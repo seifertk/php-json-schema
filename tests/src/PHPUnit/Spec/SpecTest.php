@@ -8,6 +8,28 @@ use Swaggest\JsonSchema\SchemaLoader;
 
 class SpecTest extends \PHPUnit_Framework_TestCase
 {
+    private static $refProvider;
+
+    public function setUp()
+    {
+        self::$refProvider = new Preloaded();
+        self::$refProvider
+            ->setSchemaData(
+                'http://localhost:1234/integer.json',
+                json_decode(file_get_contents(__DIR__
+                    . '/../../../../spec/JSON-Schema-Test-Suite/remotes/integer.json')))
+            ->setSchemaData(
+                'http://localhost:1234/subSchemas.json',
+                json_decode(file_get_contents(__DIR__
+                    . '/../../../../spec/JSON-Schema-Test-Suite/remotes/subSchemas.json')))
+            ->setSchemaData(
+                'http://localhost:1234/folder/folderInteger.json',
+                json_decode(file_get_contents(__DIR__
+                    . '/../../../../spec/JSON-Schema-Test-Suite/remotes/folder/folderInteger.json')));
+
+        $this->numIterations = 100;
+    }
+
     /**
      * @dataProvider provider
      * @param $schemaData
@@ -17,39 +39,28 @@ class SpecTest extends \PHPUnit_Framework_TestCase
      */
     public function testSpecDraft4($schemaData, $data, $isValid)
     {
-        static $refProvider = null;
-
-        if (null === $refProvider) {
-            $refProvider = new Preloaded();
-            $refProvider
-                ->setSchemaData(
-                    'http://localhost:1234/integer.json',
-                    json_decode(file_get_contents(__DIR__
-                        . '/../../../../spec/JSON-Schema-Test-Suite/remotes/integer.json')))
-                ->setSchemaData(
-                    'http://localhost:1234/subSchemas.json',
-                    json_decode(file_get_contents(__DIR__
-                        . '/../../../../spec/JSON-Schema-Test-Suite/remotes/subSchemas.json')))
-                ->setSchemaData(
-                    'http://localhost:1234/folder/folderInteger.json',
-                    json_decode(file_get_contents(__DIR__
-                        . '/../../../../spec/JSON-Schema-Test-Suite/remotes/folder/folderInteger.json')));
-        }
-
         $actualValid = true;
         $error = '';
-        try {
-            $schema = SchemaLoader::create()->setRemoteRefProvider($refProvider)->readSchema($schemaData);
+
+        if ($isValid) {
+            $schema = SchemaLoader::create()->setRemoteRefProvider(self::$refProvider)->readSchema($schemaData);
             $res = $schema->import($data);
             $this->assertEquals($data, $schema->export($res));
-        } catch (InvalidValue $exception) {
-            $actualValid = false;
-            $error = $exception->getMessage();
-        }
+        } else {
+            try {
+                $schema = SchemaLoader::create()->setRemoteRefProvider(self::$refProvider)->readSchema($schemaData);
+                $res = $schema->import($data);
+                $this->assertEquals($data, $schema->export($res));
+            } catch (InvalidValue $exception) {
+                $actualValid = false;
+                $error = $exception->getMessage();
+            }
 
-        $this->assertSame($isValid, $actualValid, "Schema:\n" . json_encode($schemaData, JSON_PRETTY_PRINT)
-            . "\nData:\n" . json_encode($data, JSON_PRETTY_PRINT)
-            . "\nError: " . $error . "\n");
+            $this->assertSame($isValid, $actualValid, "Schema:\n" . json_encode($schemaData, JSON_PRETTY_PRINT)
+                . "\nData:\n" . json_encode($data, JSON_PRETTY_PRINT)
+                . "\nError: " . $error . "\n");
+
+        }
     }
 
 
