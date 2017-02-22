@@ -7,10 +7,9 @@
     "phplang/scope-exit": "^1.0"
   },
   "require-dev": {
-    "phpbench/phpbench": "^1.0@dev",
     "phpunit/phpunit": "4.8.23",
     "phpunit/php-code-coverage": "2.2.4",
-    "codeclimate/php-test-reporter": "0.1.2"
+    "codeclimate/php-test-reporter": "^0.1.2"
   },
   "license": "MIT",
   "authors": [
