@@ -6,6 +6,10 @@ namespace Benchmarks;
 use Swaggest\JsonSchema\PreProcessor\NameMapper;
 use Swaggest\JsonSchema\Tests\Helper\Order;
 
+/**
+ * @Revs({1000})
+ * @Iterations(10)
+ */
 class SomeBenchmark
 {
     public function benchImport()

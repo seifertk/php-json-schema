@@ -28,6 +28,7 @@ matrix:
 script:
   - mkdir -p build/logs
   - ./vendor/bin/phpunit -v --configuration phpunit.xml --coverage-clover build/logs/clover.xml
+  - if [[ $(phpenv version-name) =~ 7.1 ]] ; then ./vendor/bin/phpbench run ./tests/src/Benchmarks/; fi
 
 after_script:
  - wget https://scrutinizer-ci.com/ocular.phar
