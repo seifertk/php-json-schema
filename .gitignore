@@ -3,3 +3,4 @@ vendor
 composer.lock
 cover.xml
 build
+benchmark-result.json

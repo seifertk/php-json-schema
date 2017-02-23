@@ -18,8 +18,6 @@ cache:
 # execute any number of scripts before the test run, custom env's are available as variables
 before_script:
   - composer install --dev --no-interaction --prefer-dist
-  - curl -o ./phpbench.phar https://phpbench.github.io/phpbench/phpbench.phar
-  - curl -o ./phpbench.phar.pubkey https://phpbench.github.io/phpbench/phpbench.phar.pubkey
 
 matrix:
   allow_failures:
@@ -36,3 +34,4 @@ after_script:
  - php ocular.phar code-coverage:upload --format=php-clover build/logs/coverage.clover
  - if [[ $(phpenv version-name) =~ 7.1 ]] ; then php vendor/bin/coveralls -v; fi
  - if [[ $(phpenv version-name) =~ 7.1 ]] ; then ./vendor/bin/test-reporter; fi
+ - cat benchmark-result.json
