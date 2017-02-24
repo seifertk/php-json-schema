@@ -508,18 +508,6 @@ class Schema extends MagicMap
         return $this;
     }
 
-    public function setItems(Schema $schema = null)
-    {
-        $this->items = $schema;
-        return $this;
-    }
-
-    public function setAdditionalProperties(Schema $schema = null)
-    {
-        $this->additionalProperties = $schema;
-        return $this;
-    }
-
     /** @var Meta[] */
     private $metaItems = array();
     public function meta(Meta $meta)
