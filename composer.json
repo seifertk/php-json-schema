@@ -3,7 +3,7 @@
   "description": "High definition PHP structures with JSON-schema based validation",
   "type": "library",
   "require": {
-    "php": ">=5.4",
+    "php": ">=5.3",
     "phplang/scope-exit": "^1.0"
   },
   "require-dev": {
@@ -21,7 +21,7 @@
   "support": {
     "email": "vearutop@gmail.com"
   },
-  "prefer-stable": true,
+  "prefer-stable": false,
   "autoload": {
     "psr-4": {
       "Swaggest\\JsonSchema\\": "src/"
@@ -35,6 +35,10 @@
   "repositories": [
     {
       "url": "https://gitlab.com/vearutop/phpunit.git",
+      "type": "git"
+    },
+    {
+      "url": "https://gitlab.com/vearutop/phpunit-bench.git",
       "type": "git"
     }
   ]
