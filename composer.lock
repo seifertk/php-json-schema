@@ -456,7 +456,7 @@
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/vearutop/phpunit-bench.git",
-                "reference": "213680a8e1f5e4f6eb03413b6d142ace19917f14"
+                "reference": "717f70ce9c60ab2b9bc07ff99fe39d6b397188ef"
             },
             "require": {
                 "php-yaoi/php-yaoi": "^1.0",
@@ -471,7 +471,7 @@
                     "PHPUnitBenchmark\\": "src/"
                 }
             },
-            "time": "2017-03-08T16:49:56+00:00"
+            "time": "2017-03-08T17:20:17+00:00"
         },
         {
             "name": "phpspec/prophecy",
@@ -790,7 +790,7 @@
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/vearutop/phpunit.git",
-                "reference": "22f042e733507ab53e9fd363f97713ac0f790047"
+                "reference": "543977a910160348b0567ce823c62c24a09f2957"
             },
             "require": {
                 "ext-dom": "*",
@@ -830,10 +830,7 @@
             "autoload": {
                 "classmap": [
                     "src/"
-                ],
-                "psr-4": {
-                    "PHPUnit\\Benchmark\\": "src/Benchmark/"
-                }
+                ]
             },
             "autoload-dev": {
                 "classmap": [
@@ -864,7 +861,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues"
             },
-            "time": "2017-03-08 15:56:28"
+            "time": "2017-03-08T17:20:17+00:00"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
