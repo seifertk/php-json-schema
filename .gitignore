@@ -2,4 +2,4 @@ vendor
 .idea
 cover.xml
 build
-benchmark-result.json
+bench*.json
