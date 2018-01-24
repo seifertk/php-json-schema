@@ -20,7 +20,7 @@ cache:
 # execute any number of scripts before the test run, custom env's are available as variables
 before_script:
   - ls -la $HOME/.composer/cache
-  - test -f $HOME/.composer/cache/composer.lock.$(phpenv version-name) && cp $HOME/.composer/cache/composer.lock.$(phpenv version-name) ./composer.lock
+  - test -f $HOME/.composer/cache/composer.lock.$(phpenv version-name) && cp $HOME/.composer/cache/composer.lock.$(phpenv version-name) ./composer.lock || echo "No composer.lock cached"
   - composer install --dev --no-interaction --prefer-dist
   - test -f $HOME/.composer/cache/composer.lock.$(phpenv version-name) || cp ./composer.lock $HOME/.composer/cache/composer.lock.$(phpenv version-name)
   - if [[ $(phpenv version-name) =~ 7.2 ]] ; then test -f $HOME/.composer/cache/phpstan.phar || wget https://github.com/phpstan/phpstan/releases/download/0.9.1/phpstan.phar -O $HOME/.composer/cache/phpstan.phar; fi
