@@ -959,7 +959,7 @@ class Schema extends JsonSchema implements MetaHolder
      * @param mixed $data
      * @param Context $options
      * @param string $path
-     * @param null $result
+     * @param mixed|null $result
      * @return array|mixed|null|object|\stdClass
      * @throws InvalidValue
      * @throws \Exception
