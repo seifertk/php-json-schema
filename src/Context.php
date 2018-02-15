@@ -30,7 +30,7 @@ class Context extends MagicMap
     /** @var bool */
     public $skipValidation = false;
 
-    /** @var string[] map of from -> to class names */
+    /** @var string[]|null map of from -> to class names */
     public $objectItemClassMapping;
 
     /** @var bool allow soft cast from to/strings */

@@ -45,7 +45,7 @@ class Schema extends JsonSchema implements MetaHolder
     const ID_D4 = 'id';
 
     // Object
-    /** @var Properties|Schema[]|Schema */
+    /** @var null|Properties|Schema[]|Schema */
     public $properties;
     /** @var Schema|bool */
     public $additionalProperties;
@@ -105,8 +105,6 @@ class Schema extends JsonSchema implements MetaHolder
         if (null === $options) {
             $options = new Context();
         }
-
-        //$options->applyDefaults = false; // todo check infinite recursion on items, additionalProperties, etc...
 
         if (isset($options->schemasCache) && is_object($data)) {
             if ($options->schemasCache->contains($data)) {
@@ -302,8 +300,7 @@ class Schema extends JsonSchema implements MetaHolder
         if ($this->format !== null) {
             $validationError = Format::validationError($this->format, $data);
             if ($validationError !== null) {
-                if ($this->format === "uri" && substr($path, -3) === ':id') {
-                } else {
+                if (!($this->format === "uri" && substr($path, -3) === ':id')) {
                     $this->fail(new StringException($validationError), $path);
                 }
             }
@@ -564,7 +561,6 @@ class Schema extends JsonSchema implements MetaHolder
                 if ($this->useObjectAsArray) {
                     $result = array();
                 } elseif (!$result instanceof ObjectItemContract) {
-                    //$result = $this->makeObjectItem($options);
                     //* todo check performance impact
                     if (null === $this->objectItemClass) {
                         $result = new ObjectItem();
@@ -606,7 +602,7 @@ class Schema extends JsonSchema implements MetaHolder
         if ($import
             && isset($data->{Schema::ID_D4})
             && ($options->version === Schema::VERSION_DRAFT_04 || $options->version === Schema::VERSION_AUTO)
-            && is_string($data->{Schema::ID_D4}) /*&& (!isset($this->properties['id']))/* && $this->isMetaSchema($data)*/) {
+            && is_string($data->{Schema::ID_D4})) {
             $id = $data->{Schema::ID_D4};
             $refResolver = $options->refResolver;
             $parentScope = $refResolver->updateResolutionScope($id);
@@ -619,7 +615,7 @@ class Schema extends JsonSchema implements MetaHolder
         if ($import
             && isset($data->{self::ID})
             && ($options->version >= Schema::VERSION_DRAFT_06 || $options->version === Schema::VERSION_AUTO)
-            && is_string($data->{self::ID}) /*&& (!isset($this->properties['id']))/* && $this->isMetaSchema($data)*/) {
+            && is_string($data->{self::ID})) {
             $id = $data->{self::ID};
             $refResolver = $options->refResolver;
             $parentScope = $refResolver->updateResolutionScope($id);
@@ -655,7 +651,6 @@ class Schema extends JsonSchema implements MetaHolder
 
                     $ref = $refResolver->resolveReference($refString);
                     $data = self::unboolSchemaData($ref->getData());
-                    //$data = $ref->getData();
                     if (!$options->validateOnly) {
                         if ($ref->isImported()) {
                             $refResult = $ref->getImported();
@@ -969,7 +964,6 @@ class Schema extends JsonSchema implements MetaHolder
     {
 
         $import = $options->import;
-        //$pathTrace = explode('->', $path);
 
         if (!$import && $data instanceof ObjectItemContract) {
             $result = new \stdClass();
@@ -979,10 +973,8 @@ class Schema extends JsonSchema implements MetaHolder
                 // @todo $path is not a valid json pointer $ref
                 $result->{self::REF} = $path;
                 return $result;
-//                return $options->circularReferences[$data];
             }
             $options->circularReferences->attach($data, $path);
-            //$options->circularReferences->attach($data, $result);
 
             $data = $data->jsonSerialize();
         }
