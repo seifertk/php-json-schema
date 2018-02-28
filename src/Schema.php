@@ -29,7 +29,7 @@ use Swaggest\JsonSchema\Structure\ObjectItemContract;
  * Class Schema
  * @package Swaggest\JsonSchema
  */
-class Schema extends JsonSchema implements MetaHolder, SchemaContract
+class Schema extends JsonSchema implements MetaHolder, SchemaContract, SchemaExporter
 {
     const CONST_PROPERTY = 'const';
 
@@ -1250,4 +1250,13 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
     {
         return $this->objectItemClass;
     }
+
+    /**
+     * @return $this|Schema
+     */
+    public function exportSchema()
+    {
+        return $this;
+    }
+
 }
