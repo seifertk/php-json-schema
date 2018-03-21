@@ -990,6 +990,10 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             $path .= '->$ref[' . strtr($ref, array('~' => '~1', ':' => '~2')) . ']';
         }
 
+        if (!$import && $data instanceof SchemaExporter) {
+            $data = $data->exportSchema();
+        }
+
         if (!$import && $data instanceof ObjectItemContract) {
             $result = new \stdClass();
 

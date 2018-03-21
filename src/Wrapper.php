@@ -5,7 +5,7 @@ namespace Swaggest\JsonSchema;
 use Swaggest\JsonSchema\Meta\MetaHolder;
 use Swaggest\JsonSchema\Structure\Nested;
 
-class Wrapper implements SchemaContract, MetaHolder
+class Wrapper implements SchemaContract, MetaHolder, SchemaExporter
 {
     /** @var Schema */
     private $schema;
@@ -202,4 +202,11 @@ class Wrapper implements SchemaContract, MetaHolder
     {
         return $this->objectItemClass;
     }
+
+    public function exportSchema()
+    {
+        return clone $this->schema;
+    }
+
+
 }

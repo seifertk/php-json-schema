@@ -26,6 +26,7 @@ trait ClassStructureTrait
             $properties = new Properties();
             $schema->properties = $properties;
             $schema->objectItemClass = $className;
+            //$schema->setFromRef('#/definitions/' . $className);
             $schemaWrapper = new Wrapper($schema);
             static::setUpProperties($properties, $schema);
             $properties->lock();
