@@ -5,6 +5,7 @@ namespace Swaggest\JsonSchema;
 
 use PhpLang\ScopeExit;
 use Swaggest\JsonDiff\JsonDiff;
+use Swaggest\JsonDiff\JsonPointer;
 use Swaggest\JsonSchema\Constraint\Content;
 use Swaggest\JsonSchema\Constraint\Format;
 use Swaggest\JsonSchema\Constraint\Properties;
@@ -986,10 +987,6 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
     {
         $import = $options->import;
 
-        if ($ref = $this->getFromRef()) {
-            $path .= '->$ref[' . strtr($ref, array('~' => '~1', ':' => '~2')) . ']';
-        }
-
         if (!$import && $data instanceof SchemaExporter) {
             $data = $data->exportSchema();
         }
@@ -997,8 +994,21 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
         if (!$import && $data instanceof ObjectItemContract) {
             $result = new \stdClass();
 
-            if ($ref = $data->getFromRef()) {
+            if ('#' === $path) {
+                $injectDefinitions = new ScopeExit(function()use($result, $options){
+                    foreach ($options->exportedDefinitions as $ref => $data) {
+                        JsonPointer::add($result, JsonPointer::splitPath($ref), $data);
+                    }
+                });
+            }
+
+            if ('#' !== $path && $ref = $data->getFromRef()) {
                 $result->{self::PROP_REF} = $ref;
+                if (!isset($options->exportedDefinitions[$ref])) {
+                    $options->exportedDefinitions[$ref] = $data->jsonSerialize();
+                }
+
+                //$options->refResolver
                 return $result;
             }
 
@@ -1012,6 +1022,11 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
             $data = $data->jsonSerialize();
         }
+
+        if ($ref = $this->getFromRef()) {
+            $path .= '->$ref[' . strtr($ref, array('~' => '~1', ':' => '~2')) . ']';
+        }
+
         if (!$import && is_array($data) && $this->useObjectAsArray) {
             $data = (object)$data;
         }

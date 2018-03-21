@@ -12,7 +12,26 @@ class ExportSchemaTest extends \PHPUnit_Framework_TestCase
     {
         $schema = DbId::schema();
         $schemaData = Schema::export($schema);
-        print_r($schemaData);
+        $expected = <<<'JSON'
+{
+    "properties": {
+        "table": {
+            "$ref": "#/definitions/Swaggest\\JsonSchema\\Tests\\Helper\\DbTable"
+        }
+    },
+    "definitions": {
+        "Swaggest\\JsonSchema\\Tests\\Helper\\DbTable": {
+            "properties": {
+                "tableName": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
+JSON;
+
+        $this->assertSame($expected, json_encode($schemaData, JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES));
     }
 
 }
