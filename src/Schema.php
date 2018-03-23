@@ -1004,7 +1004,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
             if ('#' !== $path && $ref = $data->getFromRef()) {
                 $result->{self::PROP_REF} = $ref;
-                if (!isset($options->exportedDefinitions[$ref])) {
+                if ($ref[0] === '#' && !isset($options->exportedDefinitions[$ref])) {
                     $options->exportedDefinitions[$ref] = $data->jsonSerialize();
                 }
 
