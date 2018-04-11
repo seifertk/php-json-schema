@@ -17,7 +17,6 @@ use Swaggest\JsonSchema\Structure\ClassStructure;
  *
  * // draft6
  * @property mixed $const
- * @property JsonSchema[] $patternProperties
  */
 class JsonSchema extends ClassStructure {
 	const _ARRAY = 'array';
@@ -96,7 +95,10 @@ class JsonSchema extends ClassStructure {
 	/** @var string[]|array */
 	public $required;
 
-	/** @var bool|JsonSchema */
+    /** @var JsonSchema[] */
+    public $patternProperties;
+
+    /** @var bool|JsonSchema */
 	public $additionalProperties;
 
 	/** @var JsonSchema[] */

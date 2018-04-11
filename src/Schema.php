@@ -29,7 +29,6 @@ use Swaggest\JsonSchema\Structure\ObjectItemContract;
 /**
  * Class Schema
  * @package Swaggest\JsonSchema
- * @property Schema[] $patternProperties
  */
 class Schema extends JsonSchema implements MetaHolder, SchemaContract
 {
@@ -52,6 +51,8 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
     public $properties;
     /** @var Schema|bool */
     public $additionalProperties;
+    /** @var Schema[] */
+    public $patternProperties;
     /** @var string[][]|Schema[]|\stdClass */
     public $dependencies;
 
@@ -1195,6 +1196,21 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
         $this->properties->__set($name, $schema);
         return $this;
     }
+
+    /**
+     * @param string $name
+     * @param SchemaContract $schema
+     * @return $this
+     */
+    public function setPatternProperty($name, $schema)
+    {
+        if (null === $this->patternProperties) {
+            $this->patternProperties = new Properties();
+        }
+        $this->patternProperties->__set($name, $schema);
+        return $this;
+    }
+
 
     /** @var mixed[] */
     private $metaItems = array();
