@@ -5,12 +5,16 @@ namespace Swaggest\JsonSchema;
 use Swaggest\JsonSchema\Meta\MetaHolder;
 use Swaggest\JsonSchema\Structure\Nested;
 
-class Wrapper implements SchemaContract, MetaHolder, SchemaExporter
+class Wrapper implements SchemaContract, MetaHolder, SchemaExporter, \JsonSerializable
 {
     /** @var Schema */
     private $schema;
 
-    /** @var Schema */
+    /**
+     * @todo add a proper justification comment or remove
+     * @deprecated
+     * @var Schema
+     */
     private $originalSchema;
 
     public $objectItemClass;
@@ -208,5 +212,9 @@ class Wrapper implements SchemaContract, MetaHolder, SchemaExporter
         return clone $this->schema;
     }
 
+    public function jsonSerialize()
+    {
+        return $this->schema->jsonSerialize();
+    }
 
 }
