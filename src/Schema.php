@@ -29,6 +29,7 @@ use Swaggest\JsonSchema\Structure\ObjectItemContract;
 /**
  * Class Schema
  * @package Swaggest\JsonSchema
+ * @property Schema[] $patternProperties
  */
 class Schema extends JsonSchema implements MetaHolder, SchemaContract
 {
@@ -51,8 +52,6 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
     public $properties;
     /** @var Schema|bool */
     public $additionalProperties;
-    /** @var Schema[] */
-    public $patternProperties;
     /** @var string[][]|Schema[]|\stdClass */
     public $dependencies;
 
@@ -97,7 +96,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
     /**
      * @param mixed $data
      * @param Context|null $options
-     * @return SchemaContract
+     * @return Schema
      * @throws Exception
      * @throws InvalidValue
      * @throws \Exception
@@ -811,7 +810,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             }
 
             if ($this->patternProperties !== null) {
-                foreach ($this->patternProperties as $pattern => $propertySchema) {
+                foreach ((array)$this->patternProperties as $pattern => $propertySchema) {
                     if (preg_match(Helper::toPregPattern($pattern), $key)) {
                         $found = true;
                         $value = self::unboolSchema($propertySchema)->process($value, $options,
