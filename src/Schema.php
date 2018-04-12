@@ -811,7 +811,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             }
 
             if ($this->patternProperties !== null) {
-                foreach ((array)$this->patternProperties as $pattern => $propertySchema) {
+                foreach ($this->patternProperties as $pattern => $propertySchema) {
                     if (preg_match(Helper::toPregPattern($pattern), $key)) {
                         $found = true;
                         $value = self::unboolSchema($propertySchema)->process($value, $options,
@@ -1005,7 +1005,9 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             if ('#' !== $path && $ref = $data->getFromRef()) {
                 $result->{self::PROP_REF} = $ref;
                 if ($ref[0] === '#' && !isset($options->exportedDefinitions[$ref])) {
-                    $options->exportedDefinitions[$ref] = $data->jsonSerialize();
+                    $data = $data->jsonSerialize();
+                    $options->exportedDefinitions[$ref] = &$data;
+                    $data = self::schema()->process($data, $options);
                 }
 
                 //$options->refResolver
