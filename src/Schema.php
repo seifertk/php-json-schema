@@ -532,6 +532,9 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                         $item = $this->__propertyToData[$options->mapping][$item];
                     }
                     if (!property_exists($data, $item)) {
+                        if ('$ref' === $item) {
+                            echo 'a';
+                        }
                         $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $path);
                     }
                 }
@@ -541,6 +544,9 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                         $item = $this->__dataToProperty[$options->mapping][$item];
                     }
                     if (!property_exists($data, $item)) {
+                        if ('$ref' === $item) {
+                            echo 'a';
+                        }
                         $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $path);
                     }
                 }
@@ -549,6 +555,9 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
         } else {
             foreach ($this->required as $item) {
                 if (!property_exists($data, $item)) {
+                    if ('$ref' === $item) {
+                        echo 'a';
+                    }
                     $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $path);
                 }
             }
@@ -839,6 +848,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                     if (!$options->import) {
                         // todo check mapping here
                         if ($key === 'ref') {
+                            $key = '$ref';
                             echo 'a';
                         }
                     }
