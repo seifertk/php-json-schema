@@ -117,6 +117,7 @@ class Wrapper implements SchemaContract, MetaHolder, SchemaExporter, \JsonSerial
      */
     public function __call($name, $arguments)
     {
+        /** @todo fix wrong  */
         if (substr($name, 0, 3) === 'set') {
             if (!$this->cloned) {
                 $this->schema = clone $this->schema;

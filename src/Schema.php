@@ -720,10 +720,16 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                         $key = $this->__propertyToData[$options->mapping][$key];
                     }
                 }
+                if (!$import && $key === 'ref') {
+                    echo 'a';
+                }
                 $array[$key] = $value;
             }
         } else {
             $array = (array)$data;
+            if (isset($array['ref'])) {
+                echo 'a';
+            }
         }
 
         if (!$options->skipValidation) {
@@ -828,7 +834,14 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                     $this->fail(new ObjectException('Additional properties not allowed'), $path . ':' . $key);
                 }
 
+
                 if ($this->additionalProperties instanceof SchemaContract) {
+                    if (!$options->import) {
+                        // todo check mapping here
+                        if ($key === 'ref') {
+                            echo 'a';
+                        }
+                    }
                     $value = $this->additionalProperties->process($value, $options, $path . '->additionalProperties:' . $key);
                 }
 
@@ -995,7 +1008,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             $result = new \stdClass();
 
             if ('#' === $path) {
-                $injectDefinitions = new ScopeExit(function()use($result, $options){
+                $injectDefinitions = new ScopeExit(function () use ($result, $options) {
                     foreach ($options->exportedDefinitions as $ref => $data) {
                         JsonPointer::add($result, JsonPointer::splitPath($ref), $data);
                     }
@@ -1005,9 +1018,26 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             if ('#' !== $path && $ref = $data->getFromRef()) {
                 $result->{self::PROP_REF} = $ref;
                 if ($ref[0] === '#' && !isset($options->exportedDefinitions[$ref])) {
-                    $data = $data->jsonSerialize();
+
                     $options->exportedDefinitions[$ref] = &$data;
-                    $data = self::schema()->process($data, $options);
+
+                    if ($data instanceof Schema && count($data->__propertyToData) !== 0) {
+                        // todo remove
+                        $schema = self::schema()->exportSchema();
+                        $schema->__propertyToData = $data->__propertyToData;
+                        $schema->__dataToProperty = $data->__dataToProperty;
+                        $data = $schema->process($data->jsonSerialize(), $options);
+                    } else {
+                        $data = self::schema()->process($data->jsonSerialize(), $options);
+                    }
+
+                    /*
+                    if (0 && $data instanceof SchemaContract) {
+                        $data = $data->process($data, $options);
+                    } else {
+                        $data = self::schema()->process($data, $options);
+                    }
+                    */
                 }
 
                 //$options->refResolver
