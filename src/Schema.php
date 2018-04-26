@@ -532,9 +532,6 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                         $item = $this->__propertyToData[$options->mapping][$item];
                     }
                     if (!property_exists($data, $item)) {
-                        if ('$ref' === $item) {
-                            echo 'a';
-                        }
                         $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $path);
                     }
                 }
@@ -544,9 +541,6 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                         $item = $this->__dataToProperty[$options->mapping][$item];
                     }
                     if (!property_exists($data, $item)) {
-                        if ('$ref' === $item) {
-                            echo 'a';
-                        }
                         $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $path);
                     }
                 }
@@ -555,9 +549,6 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
         } else {
             foreach ($this->required as $item) {
                 if (!property_exists($data, $item)) {
-                    if ('$ref' === $item) {
-                        echo 'a';
-                    }
                     $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $path);
                 }
             }
@@ -654,10 +645,13 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
         if ($import) {
             try {
+                $hasRefProperty = $this->properties[self::PROP_REF]
+                    || isset($this->__dataToProperty[$options->mapping][self::PROP_REF]);
+
                 while (
                     isset($data->{self::PROP_REF})
                     && is_string($data->{self::PROP_REF})
-                    && !isset($this->properties[self::PROP_REF])
+                    && !$hasRefProperty
                 ) {
                     $refString = $data->{self::PROP_REF};
 
@@ -729,16 +723,10 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                         $key = $this->__propertyToData[$options->mapping][$key];
                     }
                 }
-                if (!$import && $key === 'ref') {
-                    echo 'a';
-                }
                 $array[$key] = $value;
             }
         } else {
             $array = (array)$data;
-            if (isset($array['ref'])) {
-                echo 'a';
-            }
         }
 
         if (!$options->skipValidation) {
@@ -845,13 +833,6 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
 
                 if ($this->additionalProperties instanceof SchemaContract) {
-                    if (!$options->import) {
-                        // todo check mapping here
-                        if ($key === 'ref') {
-                            $key = '$ref';
-                            echo 'a';
-                        }
-                    }
                     $value = $this->additionalProperties->process($value, $options, $path . '->additionalProperties:' . $key);
                 }
 
@@ -1031,7 +1012,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
                     $options->exportedDefinitions[$ref] = &$data;
 
-                    if ($data instanceof Schema && count($data->__propertyToData) !== 0) {
+                    if ($data instanceof SchemaExporter && count($data->__propertyToData) !== 0) {
                         // todo remove
                         $schema = self::schema()->exportSchema();
                         $schema->__propertyToData = $data->__propertyToData;
@@ -1357,4 +1338,21 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
     {
         return $this->objectItemClass;
     }
+
+    /**
+     * @return string[]
+     */
+    public function getPropertyNames()
+    {
+        return array_keys($this->getProperties()->toArray());
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getNestedPropertyNames()
+    {
+        return $this->getProperties()->nestedPropertyNames;
+    }
+
 }
