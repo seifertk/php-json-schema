@@ -162,6 +162,8 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
         }
 
         $options->import = true;
+        $options->result = null;
+        $options->path = '#';
 
         if ($options->refResolver === null) {
             $options->refResolver = new RefResolver($data);
@@ -194,6 +196,9 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
         $context->circularReferences = new \SplObjectStorage();
         $context->import = false;
+        $context->result = null;
+        $context->path = '#';
+
         return $this->process($data, $context);
     }
 
