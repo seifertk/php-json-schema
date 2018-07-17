@@ -37,4 +37,16 @@ class CreateTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('def', $data->stringValue);
 
     }
+
+    public function testSimpleInstantiation()
+    {
+        $schema = Schema::string();
+        $this->assertSame('string', $schema->type);
+    }
+
+    public function testSimpleImport() {
+        $schemaData = (object)['type' => 'string'];
+        $schema = Schema::import($schemaData);
+        $this->assertSame('string', $schema->type);
+    }
 }

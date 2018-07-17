@@ -6,6 +6,14 @@ class Context extends MagicMap
 {
     public $import = true;
 
+    public $path = '#';
+
+    public $dataPath = '#';
+
+    public $schemaPath = '#';
+
+    public $result;
+
     /** @var DataPreProcessor */
     public $dataPreProcessor;
 
@@ -107,10 +115,14 @@ class Context extends MagicMap
         return $this;
     }
 
-    /** @var self */
+    /**
+     * @deprecated
+     * @var self
+     */
     private $withDefault;
 
     /**
+     * @deprecated
      * @return Context
      */
     public function withDefault()

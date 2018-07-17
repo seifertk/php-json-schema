@@ -100,26 +100,26 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
     /**
      * @param mixed $data
-     * @param Context|null $options
+     * @param Context|null $context
      * @return SchemaContract
      * @throws Exception
      * @throws InvalidValue
      * @throws \Exception
      */
-    public static function import($data, Context $options = null)
+    public static function import($data, Context $context = null)
     {
-        if (null === $options) {
-            $options = new Context();
+        if (null === $context) {
+            $context = new Context();
         }
 
-        $options->applyDefaults = false;
+        $context->applyDefaults = false;
 
-        if (isset($options->schemasCache) && is_object($data)) {
-            if ($options->schemasCache->contains($data)) {
-                return $options->schemasCache->offsetGet($data);
+        if (isset($context->schemasCache) && is_object($data)) {
+            if ($context->schemasCache->contains($data)) {
+                return $context->schemasCache->offsetGet($data);
             } else {
-                $schema = parent::import($data, $options);
-                $options->schemasCache->attach($data, $schema);
+                $schema = parent::import($data, $context);
+                $context->schemasCache->attach($data, $schema);
                 return $schema;
             }
         }
@@ -134,7 +134,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             return $data;
         }
 
-        return parent::import($data, $options);
+        return parent::import($data, $context);
     }
 
     /**
@@ -150,7 +150,9 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
         if (null !== $this->__booleanSchema) {
             if ($this->__booleanSchema) {
                 return $data;
-            } elseif (empty($options->skipValidation)) {
+            }
+
+            if (empty($options->skipValidation)) {
                 $this->fail(new InvalidValue('Denied by false schema'), '#');
             }
         }
@@ -173,57 +175,56 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
         $options->refResolver->preProcessReferences($data, $options);
 
-        return $this->process($data, $options, '#');
+        return $this->process($data, $options);
     }
 
 
     /**
      * @param mixed $data
-     * @param Context|null $options
+     * @param Context|null $context
      * @return array|mixed|null|object|\stdClass
      * @throws InvalidValue
      * @throws \Exception
      */
-    public function out($data, Context $options = null)
+    public function out($data, Context $context = null)
     {
-        if ($options === null) {
-            $options = new Context();
+        if ($context === null) {
+            $context = new Context();
         }
 
-        $options->circularReferences = new \SplObjectStorage();
-        $options->import = false;
-        return $this->process($data, $options);
+        $context->circularReferences = new \SplObjectStorage();
+        $context->import = false;
+        return $this->process($data, $context);
     }
 
     /**
      * @param mixed $data
-     * @param Context $options
-     * @param string $path
+     * @param Context $context
      * @throws InvalidValue
      * @throws \Exception
      */
-    private function processType($data, Context $options, $path = '#')
+    private function processType($data, Context $context)
     {
-        if ($options->tolerateStrings && is_string($data)) {
+        if ($context->tolerateStrings && is_string($data)) {
             $valid = Type::readString($this->type, $data);
         } else {
-            $valid = Type::isValid($this->type, $data, $options->version);
+            $valid = Type::isValid($this->type, $data, $context->version);
         }
         if (!$valid) {
             $this->fail(new TypeException(ucfirst(
                     implode(', ', is_array($this->type) ? $this->type : array($this->type))
                     . ' expected, ' . json_encode($data) . ' received')
-            ), $path);
+            ), $context->path);
         }
     }
 
     /**
      * @param mixed $data
-     * @param string $path
+     * @param Context $context
      * @throws InvalidValue
      * @throws \Exception
      */
-    private function processEnum($data, $path = '#')
+    private function processEnum($data, Context $context)
     {
         $enumOk = false;
         foreach ($this->enum as $item) {
@@ -241,17 +242,17 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             }
         }
         if (!$enumOk) {
-            $this->fail(new EnumException('Enum failed, enum: ' . json_encode($this->enum) . ', data: ' . json_encode($data)), $path);
+            $this->fail(new EnumException('Enum failed, enum: ' . json_encode($this->enum) . ', data: ' . json_encode($data)), $context->path);
         }
     }
 
     /**
      * @param mixed $data
-     * @param string $path
+     * @param Context $context
      * @throws InvalidValue
      * @throws \Swaggest\JsonDiff\Exception
      */
-    private function processConst($data, $path)
+    private function processConst($data, Context $context)
     {
         if ($this->const !== $data) {
             if ((is_object($this->const) && is_object($data))
@@ -259,63 +260,65 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                 $diff = new JsonDiff($this->const, $data,
                     JsonDiff::STOP_ON_DIFF);
                 if ($diff->getDiffCnt() != 0) {
-                    $this->fail(new ConstException('Const failed'), $path);
+                    $this->fail(new ConstException('Const failed'), $context->path);
                 }
             } else {
-                $this->fail(new ConstException('Const failed'), $path);
+                $this->fail(new ConstException('Const failed'), $context->path);
             }
         }
     }
 
     /**
      * @param mixed $data
-     * @param Context $options
-     * @param string $path
+     * @param Context $context
      * @throws InvalidValue
      * @throws \Exception
      * @throws \Swaggest\JsonDiff\Exception
      */
-    private function processNot($data, Context $options, $path)
+    private function processNot($data, Context $context)
     {
         $exception = false;
         try {
-            self::unboolSchema($this->not)->process($data, $options, $path . '->not');
+            $newContext = clone $context;
+            $newContext->result = null;
+            $newContext->path .= '->not';
+            self::unboolSchema($this->not)->process($data, $newContext);
         } catch (InvalidValue $exception) {
             // Expected exception
         }
         if ($exception === false) {
-            $this->fail(new LogicException('Not ' . json_encode($this->not) . ' expected, ' . json_encode($data) . ' received'), $path);
+            $this->fail(new LogicException('Not ' . json_encode($this->not) . ' expected, ' . json_encode($data) . ' received'), $context->path);
         }
     }
 
     /**
      * @param string $data
-     * @param string $path
+     * @param Context $context
      * @throws InvalidValue
      */
-    private function processString($data, $path)
+    private function processString($data, Context $context)
     {
         if ($this->minLength !== null) {
             if (mb_strlen($data, 'UTF-8') < $this->minLength) {
-                $this->fail(new StringException('String is too short', StringException::TOO_SHORT), $path);
+                $this->fail(new StringException('String is too short', StringException::TOO_SHORT), $context->path);
             }
         }
         if ($this->maxLength !== null) {
             if (mb_strlen($data, 'UTF-8') > $this->maxLength) {
-                $this->fail(new StringException('String is too long', StringException::TOO_LONG), $path);
+                $this->fail(new StringException('String is too long', StringException::TOO_LONG), $context->path);
             }
         }
         if ($this->pattern !== null) {
             if (0 === preg_match(Helper::toPregPattern($this->pattern), $data)) {
                 $this->fail(new StringException(json_encode($data) . ' does not match to '
-                    . $this->pattern, StringException::PATTERN_MISMATCH), $path);
+                    . $this->pattern, StringException::PATTERN_MISMATCH), $context->path);
             }
         }
         if ($this->format !== null) {
             $validationError = Format::validationError($this->format, $data);
             if ($validationError !== null) {
-                if (!($this->format === "uri" && substr($path, -3) === ':id')) {
-                    $this->fail(new StringException($validationError), $path);
+                if (!($this->format === "uri" && substr($context->path, -3) === ':id')) {
+                    $this->fail(new StringException($validationError), $context->path);
                 }
             }
         }
@@ -323,15 +326,15 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
     /**
      * @param float|int $data
-     * @param string $path
+     * @param Context $context
      * @throws InvalidValue
      */
-    private function processNumeric($data, $path)
+    private function processNumeric($data, Context $context)
     {
         if ($this->multipleOf !== null) {
             $div = $data / $this->multipleOf;
             if ($div != (int)$div) {
-                $this->fail(new NumericException($data . ' is not multiple of ' . $this->multipleOf, NumericException::MULTIPLE_OF), $path);
+                $this->fail(new NumericException($data . ' is not multiple of ' . $this->multipleOf, NumericException::MULTIPLE_OF), $context->path);
             }
         }
 
@@ -339,7 +342,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             if ($data >= $this->exclusiveMaximum) {
                 $this->fail(new NumericException(
                     'Value less or equal than ' . $this->exclusiveMaximum . ' expected, ' . $data . ' received',
-                    NumericException::MAXIMUM), $path);
+                    NumericException::MAXIMUM), $context->path);
             }
         }
 
@@ -347,7 +350,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             if ($data <= $this->exclusiveMinimum) {
                 $this->fail(new NumericException(
                     'Value more or equal than ' . $this->exclusiveMinimum . ' expected, ' . $data . ' received',
-                    NumericException::MINIMUM), $path);
+                    NumericException::MINIMUM), $context->path);
             }
         }
 
@@ -356,13 +359,13 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                 if ($data >= $this->maximum) {
                     $this->fail(new NumericException(
                         'Value less or equal than ' . $this->maximum . ' expected, ' . $data . ' received',
-                        NumericException::MAXIMUM), $path);
+                        NumericException::MAXIMUM), $context->path);
                 }
             } else {
                 if ($data > $this->maximum) {
                     $this->fail(new NumericException(
                         'Value less than ' . $this->maximum . ' expected, ' . $data . ' received',
-                        NumericException::MAXIMUM), $path);
+                        NumericException::MAXIMUM), $context->path);
                 }
             }
         }
@@ -372,13 +375,13 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                 if ($data <= $this->minimum) {
                     $this->fail(new NumericException(
                         'Value more or equal than ' . $this->minimum . ' expected, ' . $data . ' received',
-                        NumericException::MINIMUM), $path);
+                        NumericException::MINIMUM), $context->path);
                 }
             } else {
                 if ($data < $this->minimum) {
                     $this->fail(new NumericException(
                         'Value more than ' . $this->minimum . ' expected, ' . $data . ' received',
-                        NumericException::MINIMUM), $path);
+                        NumericException::MINIMUM), $context->path);
                 }
             }
         }
@@ -386,30 +389,32 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
     /**
      * @param mixed $data
-     * @param Context $options
-     * @param string $path
+     * @param Context $context
      * @return array|mixed|null|object|\stdClass
      * @throws InvalidValue
      * @throws \Exception
      * @throws \Swaggest\JsonDiff\Exception
      */
-    private function processOneOf($data, Context $options, $path)
+    private function processOneOf($data, Context $context)
     {
         $successes = 0;
         $failures = '';
         $subErrors = [];
         $skipValidation = false;
-        if ($options->skipValidation) {
+        if ($context->skipValidation) {
             $skipValidation = true;
-            $options->skipValidation = false;
+            $context->skipValidation = false;
         }
 
         $result = $data;
         foreach ($this->oneOf as $index => $item) {
             try {
-                $result = self::unboolSchema($item)->process($data, $options, $path . '->oneOf[' . $index . ']');
+                $newContext = clone $context;
+                $newContext->result = null;
+                $newContext->path .= '->oneOf[' . $index . ']';
+                $result = self::unboolSchema($item)->process($data, $newContext);
                 $successes++;
-                if ($successes > 1 || $options->skipValidation) {
+                if ($successes > 1 || $context->skipValidation) {
                     break;
                 }
             } catch (InvalidValue $exception) {
@@ -419,25 +424,28 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             }
         }
         if ($skipValidation) {
-            $options->skipValidation = true;
+            $context->skipValidation = true;
             if ($successes === 0) {
-                $result = self::unboolSchema($this->oneOf[0])->process($data, $options, $path . '->oneOf[0]');
+                $newContext = clone $context;
+                $newContext->result = null;
+                $newContext->path .= '->oneOf[0]';
+                $result = self::unboolSchema($this->oneOf[0])->process($data, $newContext);
             }
         }
 
-        if (!$options->skipValidation) {
+        if (!$context->skipValidation) {
             if ($successes === 0) {
                 $exception = new LogicException('No valid results for oneOf {' . "\n" . substr($failures, 0, -1) . "\n}");
                 $exception->error = 'No valid results for oneOf';
                 $exception->subErrors = $subErrors;
-                $this->fail($exception, $path);
+                $this->fail($exception, $context->path);
             } elseif ($successes > 1) {
                 $exception = new LogicException('More than 1 valid result for oneOf: '
                     . $successes . '/' . count($this->oneOf) . ' valid results for oneOf {'
                     . "\n" . substr($failures, 0, -1) . "\n}");
                 $exception->error = 'More than 1 valid result for oneOf';
                 $exception->subErrors = $subErrors;
-                $this->fail($exception, $path);
+                $this->fail($exception, $context->path);
             }
         }
         return $result;
@@ -445,14 +453,13 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
     /**
      * @param mixed $data
-     * @param Context $options
-     * @param string $path
+     * @param Context $context
      * @return array|mixed|null|object|\stdClass
      * @throws InvalidValue
      * @throws \Exception
      * @throws \Swaggest\JsonDiff\Exception
      */
-    private function processAnyOf($data, Context $options, $path)
+    private function processAnyOf($data, Context $context)
     {
         $successes = 0;
         $failures = '';
@@ -460,7 +467,10 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
         $result = $data;
         foreach ($this->anyOf as $index => $item) {
             try {
-                $result = self::unboolSchema($item)->process($data, $options, $path . '->anyOf[' . $index . ']');
+                $newContext = clone $context;
+                $newContext->result = null;
+                $newContext->path .= '->anyOf[' . $index . ']';
+                $result = self::unboolSchema($item)->process($data, $newContext);
                 $successes++;
                 if ($successes) {
                     break;
@@ -471,59 +481,69 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                 // Expected exception
             }
         }
-        if (!$successes && !$options->skipValidation) {
+        if (!$successes && !$context->skipValidation) {
             $exception = new LogicException('No valid results for anyOf {' . "\n"
                 . substr(Helper::padLines(' ', $failures, false), 0, -1)
                 . "\n}");
             $exception->error = 'No valid results for anyOf';
             $exception->subErrors = $subErrors;
-            $this->fail($exception, $path);
+            $this->fail($exception, $context->path);
         }
         return $result;
     }
 
     /**
      * @param mixed $data
-     * @param Context $options
-     * @param string $path
+     * @param Context $context
      * @return array|mixed|null|object|\stdClass
      * @throws InvalidValue
      * @throws \Exception
      * @throws \Swaggest\JsonDiff\Exception
      */
-    private function processAllOf($data, Context $options, $path)
+    private function processAllOf($data, Context $context)
     {
         $result = $data;
         foreach ($this->allOf as $index => $item) {
-            $result = self::unboolSchema($item)->process($data, $options, $path . '->allOf[' . $index . ']');
+            $newContext = clone $context;
+            $newContext->result = null;
+            $newContext->path .= '->allOf[' . $index . ']';
+            $result = self::unboolSchema($item)->process($data, $newContext);
         }
         return $result;
     }
 
     /**
      * @param mixed $data
-     * @param Context $options
-     * @param string $path
+     * @param Context $context
      * @return array|mixed|null|object|\stdClass
      * @throws InvalidValue
      * @throws \Exception
      * @throws \Swaggest\JsonDiff\Exception
      */
-    private function processIf($data, Context $options, $path)
+    private function processIf($data, Context $context)
     {
         $valid = true;
         try {
-            self::unboolSchema($this->if)->process($data, $options, $path . '->if');
+            $newContext = clone $context;
+            $newContext->result = null;
+            $newContext->path .= '->if';
+            self::unboolSchema($this->if)->process($data, $newContext);
         } catch (InvalidValue $exception) {
             $valid = false;
         }
         if ($valid) {
             if ($this->then !== null) {
-                return self::unboolSchema($this->then)->process($data, $options, $path . '->then');
+                $newContext = clone $context;
+                $newContext->result = null;
+                $newContext->path .= '->then';
+                return self::unboolSchema($this->then)->process($data, $newContext);
             }
         } else {
             if ($this->else !== null) {
-                return self::unboolSchema($this->else)->process($data, $options, $path . '->else');
+                $newContext = clone $context;
+                $newContext->result = null;
+                $newContext->path .= '->else';
+                return self::unboolSchema($this->else)->process($data, $newContext);
             }
         }
         return null;
@@ -531,29 +551,28 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
     /**
      * @param \stdClass $data
-     * @param Context $options
-     * @param string $path
+     * @param Context $context
      * @throws InvalidValue
      */
-    private function processObjectRequired($data, Context $options, $path)
+    private function processObjectRequired($data, Context $context)
     {
-        if (isset($this->__dataToProperty[$options->mapping])) {
-            if ($options->import) {
+        if (isset($this->__dataToProperty[$context->mapping])) {
+            if ($context->import) {
                 foreach ($this->required as $item) {
-                    if (isset($this->__propertyToData[$options->mapping][$item])) {
-                        $item = $this->__propertyToData[$options->mapping][$item];
+                    if (isset($this->__propertyToData[$context->mapping][$item])) {
+                        $item = $this->__propertyToData[$context->mapping][$item];
                     }
                     if (!property_exists($data, $item)) {
-                        $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $path);
+                        $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $context->path);
                     }
                 }
             } else {
                 foreach ($this->required as $item) {
-                    if (isset($this->__dataToProperty[$options->mapping][$item])) {
-                        $item = $this->__dataToProperty[$options->mapping][$item];
+                    if (isset($this->__dataToProperty[$context->mapping][$item])) {
+                        $item = $this->__dataToProperty[$context->mapping][$item];
                     }
                     if (!property_exists($data, $item)) {
-                        $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $path);
+                        $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $context->path);
                     }
                 }
             }
@@ -561,7 +580,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
         } else {
             foreach ($this->required as $item) {
                 if (!property_exists($data, $item)) {
-                    $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $path);
+                    $this->fail(new ObjectException('Required property missing: ' . $item . ', data: ' . json_encode($data, JSON_UNESCAPED_SLASHES), ObjectException::REQUIRED), $context->path);
                 }
             }
         }
@@ -569,46 +588,44 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
     /**
      * @param \stdClass $data
-     * @param Context $options
-     * @param string $path
-     * @param ObjectItemContract|null $result
+     * @param Context $context
      * @return array|null|ClassStructure|ObjectItemContract
      * @throws InvalidValue
      * @throws \Exception
      * @throws \Swaggest\JsonDiff\Exception
      */
-    private function processObject($data, Context $options, $path, $result = null)
+    private function processObject($data, Context $context)
     {
-        $import = $options->import;
+        $import = $context->import;
 
-        if (!$options->skipValidation && $this->required !== null) {
-            $this->processObjectRequired($data, $options, $path);
+        if (!$context->skipValidation && $this->required !== null) {
+            $this->processObjectRequired($data, $context);
         }
 
         if ($import) {
-            if (!$options->validateOnly) {
+            if (!$context->validateOnly) {
 
                 if ($this->useObjectAsArray) {
-                    $result = array();
-                } elseif (!$result instanceof ObjectItemContract) {
+                    $context->result = array();
+                } elseif (!$context->result instanceof ObjectItemContract) {
                     //* todo check performance impact
                     if (null === $this->objectItemClass) {
-                        $result = new ObjectItem();
+                        $context->result = new ObjectItem();
                     } else {
                         $className = $this->objectItemClass;
-                        if ($options->objectItemClassMapping !== null) {
-                            if (isset($options->objectItemClassMapping[$className])) {
-                                $className = $options->objectItemClassMapping[$className];
+                        if ($context->objectItemClassMapping !== null) {
+                            if (isset($context->objectItemClassMapping[$className])) {
+                                $className = $context->objectItemClassMapping[$className];
                             }
                         }
-                        $result = new $className;
+                        $context->result = new $className;
                     }
                     //*/
 
 
-                    if ($result instanceof ClassStructure) {
-                        if ($result->__validateOnSet) {
-                            $result->__validateOnSet = false;
+                    if ($context->result instanceof ClassStructure) {
+                        if ($context->result->__validateOnSet) {
+                            $context->result->__validateOnSet = false;
                             /** @noinspection PhpUnusedLocalVariableInspection */
                             /* todo check performance impact
                             $validateOnSetHandler = new ScopeExit(function () use ($result) {
@@ -619,8 +636,8 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                     }
 
                     //* todo check performance impact
-                    if ($result instanceof ObjectItemContract) {
-                        $result->setDocumentPath($path);
+                    if ($context->result instanceof ObjectItemContract) {
+                        $context->result->setDocumentPath($context->path);
                     }
                     //*/
                 }
@@ -631,10 +648,10 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
         if ($import
             && isset($data->{Schema::PROP_ID_D4})
-            && ($options->version === Schema::VERSION_DRAFT_04 || $options->version === Schema::VERSION_AUTO)
+            && ($context->version === Schema::VERSION_DRAFT_04 || $context->version === Schema::VERSION_AUTO)
             && is_string($data->{Schema::PROP_ID_D4})) {
             $id = $data->{Schema::PROP_ID_D4};
-            $refResolver = $options->refResolver;
+            $refResolver = $context->refResolver;
             $parentScope = $refResolver->updateResolutionScope($id);
             /** @noinspection PhpUnusedLocalVariableInspection */
             $defer = new ScopeExit(function () use ($parentScope, $refResolver) {
@@ -644,10 +661,10 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
         if ($import
             && isset($data->{self::PROP_ID})
-            && ($options->version >= Schema::VERSION_DRAFT_06 || $options->version === Schema::VERSION_AUTO)
+            && ($context->version >= Schema::VERSION_DRAFT_06 || $context->version === Schema::VERSION_AUTO)
             && is_string($data->{self::PROP_ID})) {
             $id = $data->{self::PROP_ID};
-            $refResolver = $options->refResolver;
+            $refResolver = $context->refResolver;
             $parentScope = $refResolver->updateResolutionScope($id);
             /** @noinspection PhpUnusedLocalVariableInspection */
             $defer = new ScopeExit(function () use ($parentScope, $refResolver) {
@@ -663,8 +680,8 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
                 if (isset($data->{self::PROP_REF})) {
                     if (null === $refProperty = $this->properties[self::PROP_REF]) {
-                        if (isset($this->__dataToProperty[$options->mapping][self::PROP_REF])) {
-                            $refProperty = $this->properties[$this->__dataToProperty[$options->mapping][self::PROP_REF]];
+                        if (isset($this->__dataToProperty[$context->mapping][self::PROP_REF])) {
+                            $refProperty = $this->properties[$this->__dataToProperty[$context->mapping][self::PROP_REF]];
                         }
                     }
 
@@ -688,7 +705,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                     }
 
                     // TODO consider process # by reference here ?
-                    $refResolver = $options->refResolver;
+                    $refResolver = $context->refResolver;
                     $preRefScope = $refResolver->getResolutionScope();
                     /** @noinspection PhpUnusedLocalVariableInspection */
                     $deferRefScope = new ScopeExit(function () use ($preRefScope, $refResolver) {
@@ -697,14 +714,17 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
                     $ref = $refResolver->resolveReference($refString);
                     $data = self::unboolSchemaData($ref->getData());
-                    if (!$options->validateOnly) {
+                    if (!$context->validateOnly) {
                         if ($ref->isImported()) {
                             $refResult = $ref->getImported();
                             return $refResult;
                         }
-                        $ref->setImported($result);
+                        $ref->setImported($context->result);
                         try {
-                            $refResult = $this->process($data, $options, $path . '->$ref:' . $refString, $result);
+                            $newContext = clone $context;
+                            $newContext->result = null;
+                            $newContext->path .= '->$ref:' . $refString;
+                            $refResult = $this->process($data, $newContext);
                             if ($refResult instanceof ObjectItemContract) {
                                 if ($refResult->getFromRefs()) {
                                     $refResult = clone $refResult; // @todo check performance, consider option
@@ -718,11 +738,14 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                         }
                         return $refResult;
                     } else {
-                        $this->process($data, $options, $path . '->$ref:' . $refString);
+                        $newContext = clone $context;
+                        $newContext->result = null;
+                        $newContext->path .= '->$ref:' . $refString;
+                        $this->process($data, $newContext);
                     }
                 }
             } catch (InvalidValue $exception) {
-                $this->fail($exception, $path);
+                $this->fail($exception, $context->path);
             }
         }
 
@@ -740,15 +763,15 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
         }
 
         $array = array();
-        if (!empty($this->__dataToProperty[$options->mapping])) { // todo skip on $options->validateOnly
+        if (!empty($this->__dataToProperty[$context->mapping])) { // todo skip on $options->validateOnly
             foreach ((array)$data as $key => $value) {
                 if ($import) {
-                    if (isset($this->__dataToProperty[$options->mapping][$key])) {
-                        $key = $this->__dataToProperty[$options->mapping][$key];
+                    if (isset($this->__dataToProperty[$context->mapping][$key])) {
+                        $key = $this->__dataToProperty[$context->mapping][$key];
                     }
                 } else {
-                    if (isset($this->__propertyToData[$options->mapping][$key])) {
-                        $key = $this->__propertyToData[$options->mapping][$key];
+                    if (isset($this->__propertyToData[$context->mapping][$key])) {
+                        $key = $this->__propertyToData[$context->mapping][$key];
                     }
                 }
                 $array[$key] = $value;
@@ -757,32 +780,36 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             $array = (array)$data;
         }
 
-        if (!$options->skipValidation) {
+        if (!$context->skipValidation) {
             if ($this->minProperties !== null && count($array) < $this->minProperties) {
-                $this->fail(new ObjectException("Not enough properties", ObjectException::TOO_FEW), $path);
+                $this->fail(new ObjectException("Not enough properties", ObjectException::TOO_FEW), $context->path);
             }
             if ($this->maxProperties !== null && count($array) > $this->maxProperties) {
-                $this->fail(new ObjectException("Too many properties", ObjectException::TOO_MANY), $path);
+                $this->fail(new ObjectException("Too many properties", ObjectException::TOO_MANY), $context->path);
             }
             if ($this->propertyNames !== null) {
                 $propertyNames = self::unboolSchema($this->propertyNames);
                 foreach ($array as $key => $tmp) {
-                    $propertyNames->process($key, $options, $path . '->propertyNames:' . $key);
+                    $newContext = clone $context;
+                    $newContext->result = null;
+                    $newContext->path .= '->propertyNames:' . $key;
+
+                    $propertyNames->process($key, $newContext);
                 }
             }
         }
 
         $defaultApplied = array();
         if ($import
-            && !$options->validateOnly
-            && $options->applyDefaults
+            && !$context->validateOnly
+            && $context->applyDefaults
             && $properties !== null
         ) {
             foreach ($properties as $key => $property) {
                 // todo check when property is \stdClass `{}` here (RefTest)
                 if ($property instanceof SchemaContract && null !== $default = $property->getDefault()) {
-                    if (isset($this->__dataToProperty[$options->mapping][$key])) {
-                        $key = $this->__dataToProperty[$options->mapping][$key];
+                    if (isset($this->__dataToProperty[$context->mapping][$key])) {
+                        $key = $this->__dataToProperty[$context->mapping][$key];
                     }
                     if (!array_key_exists($key, $array)) {
                         $defaultApplied[$key] = true;
@@ -794,23 +821,26 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
 
         foreach ($array as $key => $value) {
             if ($key === '' && PHP_VERSION_ID < 71000) {
-                $this->fail(new InvalidValue('Empty property name'), $path);
+                $this->fail(new InvalidValue('Empty property name'), $context->path);
             }
 
             $found = false;
 
-            if (!$options->skipValidation && !empty($this->dependencies)) {
+            if (!$context->skipValidation && !empty($this->dependencies)) {
                 $deps = $this->dependencies;
                 if (isset($deps->$key)) {
                     $dependencies = $deps->$key;
                     $dependencies = self::unboolSchema($dependencies);
                     if ($dependencies instanceof SchemaContract) {
-                        $dependencies->process($data, $options, $path . '->dependencies:' . $key);
+                        $newContext = clone $context;
+                        $newContext->result = null;
+                        $newContext->path .= '->dependencies:' . $key;
+                        $dependencies->process($data, $newContext);
                     } else {
                         foreach ($dependencies as $item) {
                             if (!property_exists($data, $item)) {
                                 $this->fail(new ObjectException('Dependency property missing: ' . $item,
-                                    ObjectException::DEPENDENCY_MISSING), $path);
+                                    ObjectException::DEPENDENCY_MISSING), $context->path);
                             }
                         }
                     }
@@ -824,10 +854,16 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                 $propertyFound = true;
                 $found = true;
                 if ($prop instanceof SchemaContract) {
+                    $newContext = clone $context;
+                    $newContext->result = null;
+                    $newContext->path .= '->properties:' . $key;
+                    if (isset($defaultApplied[$key])) {
+                        $newContext->skipValidation = true;
+                        $newContext->applyDefaults = false;
+                    }
                     $value = $prop->process(
                         $value,
-                        isset($defaultApplied[$key]) ? $options->withDefault() : $options,
-                        $path . '->properties:' . $key
+                        $newContext
                     );
                 }
             }
@@ -838,79 +874,85 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                 $found = true;
                 $nestedEggs = $nestedProperties[$key];
                 // todo iterate all nested props?
-                $value = self::unboolSchema($nestedEggs[0]->propertySchema)->process($value, $options, $path . '->nestedProperties:' . $key);
+                $newContext = clone $context;
+                $newContext->result = null;
+                $newContext->path .= '->nestedProperties:' . $key;
+                $value = self::unboolSchema($nestedEggs[0]->propertySchema)->process($value, $newContext);
             }
 
             if ($this->patternProperties !== null) {
                 foreach ($this->patternProperties as $pattern => $propertySchema) {
                     if (preg_match(Helper::toPregPattern($pattern), $key)) {
                         $found = true;
-                        $value = self::unboolSchema($propertySchema)->process($value, $options,
-                            $path . '->patternProperties[' . strtr($pattern, array('~' => '~1', ':' => '~2')) . ']:' . $key);
-                        if (!$options->validateOnly && $import) {
-                            $result->addPatternPropertyName($pattern, $key);
+                        $newContext = clone $context;
+                        $newContext->result = null;
+                        $newContext->path .= '->patternProperties[' . strtr($pattern, array('~' => '~1', ':' => '~2')) . ']:' . $key;
+                        $value = self::unboolSchema($propertySchema)->process($value, $newContext);
+                        if (!$context->validateOnly && $import) {
+                            $context->result->addPatternPropertyName($pattern, $key);
                         }
                         //break; // todo manage multiple import data properly (pattern accessor)
                     }
                 }
             }
             if (!$found && $this->additionalProperties !== null) {
-                if (!$options->skipValidation && $this->additionalProperties === false) {
-                    $this->fail(new ObjectException('Additional properties not allowed: ' . $key), $path);
+                if (!$context->skipValidation && $this->additionalProperties === false) {
+                    $this->fail(new ObjectException('Additional properties not allowed: ' . $key), $context->path);
                 }
 
                 if ($this->additionalProperties instanceof SchemaContract) {
-                    $value = $this->additionalProperties->process($value, $options, $path . '->additionalProperties:' . $key);
+                    $newContext = clone $context;
+                    $newContext->result = null;
+                    $newContext->path .= '->additionalProperties:' . $key;
+                    $value = $this->additionalProperties->process($value, $newContext);
                 }
 
-                if ($import && !$this->useObjectAsArray && !$options->validateOnly) {
-                    $result->addAdditionalPropertyName($key);
+                if ($import && !$this->useObjectAsArray && !$context->validateOnly) {
+                    $context->result->addAdditionalPropertyName($key);
                 }
             }
 
-            if (!$options->validateOnly && $nestedEggs && $import) {
+            if (!$context->validateOnly && $nestedEggs && $import) {
                 foreach ($nestedEggs as $nestedEgg) {
-                    $result->setNestedProperty($key, $value, $nestedEgg);
+                    $context->result->setNestedProperty($key, $value, $nestedEgg);
                 }
                 if ($propertyFound) {
-                    $result->$key = $value;
+                    $context->result->$key = $value;
                 }
             } else {
                 if ($this->useObjectAsArray && $import) {
-                    $result[$key] = $value;
+                    $context->result[$key] = $value;
                 } else {
                     if ($found || !$import) {
-                        $result->$key = $value;
-                    } elseif (!isset($result->$key)) {
-                        $result->$key = $value;
+                        $context->result->$key = $value;
+                    } elseif (!isset($context->result->$key)) {
+                        $context->result->$key = $value;
                     }
                 }
             }
         }
 
-        return $result;
+        return $context->result;
     }
 
     /**
      * @param array $data
-     * @param Context $options
-     * @param string $path
-     * @param array $result
+     * @param Context $context
      * @return mixed
      * @throws InvalidValue
      * @throws \Exception
      * @throws \Swaggest\JsonDiff\Exception
      */
-    private function processArray($data, Context $options, $path, $result)
+    private function processArray($data, Context $context)
     {
         $count = count($data);
-        if (!$options->skipValidation) {
+        if (!$context->skipValidation) {
             if ($this->minItems !== null && $count < $this->minItems) {
-                $this->fail(new ArrayException("Not enough items in array"), $path);
+                $this->fail(new ArrayException('Not enough items in array'), $context->path);
             }
 
             if ($this->maxItems !== null && $count > $this->maxItems) {
-                $this->fail(new ArrayException("Too many items in array"), $path);
+                $this->fail(new ArrayException('Too many items in array'), $context->path);
             }
         }
 
@@ -934,35 +976,40 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
          */
         $itemsLen = is_array($items) ? count($items) : 0;
         $index = 0;
-        foreach ($result as $key => $value) {
+        foreach ($context->result as $key => $value) {
             if ($index < $itemsLen) {
                 $itemSchema = self::unboolSchema($items[$index]);
-                $result[$key] = $itemSchema->process($value, $options, $path . '->items:' . $index);
+                $newContext = clone $context;
+                $newContext->result = null;
+                $newContext->path .= '->items:' . $index;
+                $context->result[$key] = $itemSchema->process($value, $newContext);
             } else {
                 if ($additionalItems instanceof SchemaContract) {
-                    $result[$key] = $additionalItems->process($value, $options, $path . '->' . $pathItems
-                        . '[' . $index . ']:' . $index);
-                } elseif (!$options->skipValidation && $additionalItems === false) {
-                    $this->fail(new ArrayException('Unexpected array item'), $path);
+                    $newContext = clone $context;
+                    $newContext->result = null;
+                    $newContext->path .= '->' . $pathItems . '[' . $index . ']:' . $index;
+                    $context->result[$key] = $additionalItems->process($value, $newContext);
+                } elseif (!$context->skipValidation && $additionalItems === false) {
+                    $this->fail(new ArrayException('Unexpected array item'), $context->path);
                 }
             }
             ++$index;
         }
 
-        if (!$options->skipValidation && $this->uniqueItems) {
+        if (!$context->skipValidation && $this->uniqueItems) {
             if (!UniqueItems::isValid($data)) {
-                $this->fail(new ArrayException('Array is not unique'), $path);
+                $this->fail(new ArrayException('Array is not unique'), $context->path);
             }
         }
 
-        if (!$options->skipValidation && $this->contains !== null) {
+        if (!$context->skipValidation && $this->contains !== null) {
             /** @var Schema|bool $contains */
             $contains = $this->contains;
             if ($contains === false) {
-                $this->fail(new ArrayException('Contains is false'), $path);
+                $this->fail(new ArrayException('Contains is false'), $context->path);
             }
             if ($count === 0) {
-                $this->fail(new ArrayException('Empty array fails contains constraint'), $path);
+                $this->fail(new ArrayException('Empty array fails contains constraint'), $context->path);
             }
             if ($contains === true) {
                 $contains = self::unboolSchema($contains);
@@ -970,53 +1017,53 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             $containsOk = false;
             foreach ($data as $key => $item) {
                 try {
-                    $contains->process($item, $options, $path . '->' . $key);
+                    $newContext = clone $context;
+                    $newContext->result = null;
+                    $newContext->path .= '->' . $key;
+                    $contains->process($item, $newContext);
                     $containsOk = true;
                     break;
                 } catch (InvalidValue $exception) {
                 }
             }
             if (!$containsOk) {
-                $this->fail(new ArrayException('Array fails contains constraint'), $path);
+                $this->fail(new ArrayException('Array fails contains constraint'), $context->path);
             }
         }
-        return $result;
+        return $context->result;
     }
 
     /**
      * @param mixed|string $data
-     * @param Context $options
-     * @param string $path
+     * @param Context $context
      * @return bool|mixed|string
      * @throws InvalidValue
      */
-    private function processContent($data, Context $options, $path)
+    private function processContent($data, Context $context)
     {
         try {
-            if ($options->unpackContentMediaType) {
-                return Content::process($options, $this->contentEncoding, $this->contentMediaType, $data, $options->import);
+            if ($context->unpackContentMediaType) {
+                return Content::process($context, $this->contentEncoding, $this->contentMediaType, $data, $context->import);
             } else {
-                Content::process($options, $this->contentEncoding, $this->contentMediaType, $data, true);
+                Content::process($context, $this->contentEncoding, $this->contentMediaType, $data, true);
             }
         } catch (InvalidValue $exception) {
-            $this->fail($exception, $path);
+            $this->fail($exception, $context->path);
         }
         return $data;
     }
 
     /**
      * @param mixed $data
-     * @param Context $options
-     * @param string $path
-     * @param mixed|null $result
+     * @param Context $context
      * @return array|mixed|null|object|\stdClass
      * @throws InvalidValue
      * @throws \Exception
      * @throws \Swaggest\JsonDiff\Exception
      */
-    public function process($data, Context $options, $path = '#', $result = null)
+    public function process($data, Context $context)
     {
-        $import = $options->import;
+        $import = $context->import;
 
         if (!$import && $data instanceof SchemaExporter) {
             $data = $data->exportSchema(); // Used to export ClassStructure::schema()
@@ -1025,9 +1072,9 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
         if (!$import && $data instanceof ObjectItemContract) {
             $result = new \stdClass();
 
-            if ('#' === $path) {
-                $injectDefinitions = new ScopeExit(function () use ($result, $options) {
-                    foreach ($options->exportedDefinitions as $ref => $data) {
+            if ('#' === $context->path) {
+                $injectDefinitions = new ScopeExit(function () use ($result, $context) {
+                    foreach ($context->exportedDefinitions as $ref => $data) {
                         if ($data !== null) {
                             JsonPointer::add($result, JsonPointer::splitPath($ref), $data,
                                 /*JsonPointer::SKIP_IF_ISSET + */
@@ -1037,25 +1084,25 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                 });
             }
 
-            if ($options->isRef) {
-                $options->isRef = false;
+            if ($context->isRef) {
+                $context->isRef = false;
             } else {
-                if ('#' !== $path && $refs = $data->getFromRefs()) {
+                if ('#' !== $context->path && $refs = $data->getFromRefs()) {
                     $ref = $refs[0];
-                    if (!array_key_exists($ref, $options->exportedDefinitions) && strpos($ref, '://') === false) {
+                    if (!array_key_exists($ref, $context->exportedDefinitions) && strpos($ref, '://') === false) {
                         $exported = null;
-                        $options->exportedDefinitions[$ref] = &$exported;
-                        $options->isRef = true;
-                        $exported = $this->process($data, $options, $ref);
+                        $context->exportedDefinitions[$ref] = &$exported;
+                        $context->isRef = true;
+                        $exported = $this->process($data, $context, $ref);
                         unset($exported);
                     }
 
                     for ($i = 1; $i < count($refs); $i++) {
                         $ref = $refs[$i];
-                        if (!array_key_exists($ref, $options->exportedDefinitions) && strpos($ref, '://') === false) {
+                        if (!array_key_exists($ref, $context->exportedDefinitions) && strpos($ref, '://') === false) {
                             $exported = new \stdClass();
                             $exported->{self::PROP_REF} = $refs[$i - 1];
-                            $options->exportedDefinitions[$ref] = $exported;
+                            $context->exportedDefinitions[$ref] = $exported;
                         }
                     }
 
@@ -1064,90 +1111,90 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
                 }
             }
 
-            if ($options->circularReferences->contains($data)) {
+            if ($context->circularReferences->contains($data)) {
                 /** @noinspection PhpIllegalArrayKeyTypeInspection */
-                $path = $options->circularReferences[$data];
-                $result->{self::PROP_REF} = PointerUtil::getDataPointer($path, true);
+                $context->path = $context->circularReferences[$data];
+                $result->{self::PROP_REF} = PointerUtil::getDataPointer($context->path, true);
                 return $result;
             }
-            $options->circularReferences->attach($data, $path);
+            $context->circularReferences->attach($data, $context->path);
 
             $data = $data->jsonSerialize();
         }
 
-        $path .= $this->getFromRefPath();
+        $context->path .= $this->getFromRefPath();
 
         if (!$import && is_array($data) && $this->useObjectAsArray) {
             $data = (object)$data;
         }
 
-        if (null !== $options->dataPreProcessor) {
-            $data = $options->dataPreProcessor->process($data, $this, $import);
+        if (null !== $context->dataPreProcessor) {
+            $data = $context->dataPreProcessor->process($data, $this, $import);
         }
 
-        if ($result === null) {
-            $result = $data;
+        if ($context->result === null) {
+            $context->result = $data;
         }
 
-        if ($options->skipValidation) {
+        if ($context->skipValidation) {
             goto skipValidation;
         }
 
         if ($this->type !== null) {
-            $this->processType($data, $options, $path);
+            $this->processType($data, $context);
         }
 
         if ($this->enum !== null) {
-            $this->processEnum($data, $path);
+            $this->processEnum($data, $context);
         }
 
         if (array_key_exists(self::CONST_PROPERTY, $this->__arrayOfData)) {
-            $this->processConst($data, $path);
+            $this->processConst($data, $context);
         }
 
         if ($this->not !== null) {
-            $this->processNot($data, $options, $path);
+            $this->processNot($data, $context);
         }
 
         if (is_string($data)) {
-            $this->processString($data, $path);
+            $this->processString($data, $context);
         }
 
         if (is_int($data) || is_float($data)) {
-            $this->processNumeric($data, $path);
+            $this->processNumeric($data, $context);
         }
 
         if ($this->if !== null) {
-            $result = $this->processIf($data, $options, $path);
+            $context->result = $this->processIf($data, $context);
         }
 
         skipValidation:
 
         if ($this->oneOf !== null) {
-            $result = $this->processOneOf($data, $options, $path);
+            $context->result = $this->processOneOf($data, $context);
         }
 
         if ($this->anyOf !== null) {
-            $result = $this->processAnyOf($data, $options, $path);
+            $context->result = $this->processAnyOf($data, $context);
         }
 
         if ($this->allOf !== null) {
-            $result = $this->processAllOf($data, $options, $path);
+            $context->result = $this->processAllOf($data, $context);
         }
 
         if ($data instanceof \stdClass) {
-            $result = $this->processObject($data, $options, $path, $result);
+            $context->result = $this->processObject($data, $context);
         }
 
         if (is_array($data)) {
-            $result = $this->processArray($data, $options, $path, $result);
+            $context->result = $this->processArray($data, $context);
         }
 
         if ($this->contentEncoding !== null || $this->contentMediaType !== null) {
-            $result = $this->processContent($data, $options, $path);
+            $context->result = $this->processContent($data, $context);
         }
 
-        return $result;
+        return $context->result;
     }
 
     /**

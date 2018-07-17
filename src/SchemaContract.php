@@ -9,12 +9,10 @@ interface SchemaContract
 {
     /**
      * @param mixed $data
-     * @param Context $options
-     * @param string $path
-     * @param mixed|null $result
+     * @param Context $context
      * @return array|mixed|null|object|\stdClass
      */
-    public function process($data, Context $options, $path = '#', $result = null);
+    public function process($data, Context $context);
 
     /**
      * @param mixed $data
@@ -26,11 +24,11 @@ interface SchemaContract
 
     /**
      * @param mixed $data
-     * @param Context|null $options
+     * @param Context|null $context
      * @throws InvalidValue
      * @return array|mixed|null|object|\stdClass
      */
-    public function out($data, Context $options = null);
+    public function out($data, Context $context = null);
 
     /**
      * @return mixed

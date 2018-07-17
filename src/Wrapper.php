@@ -33,17 +33,15 @@ class Wrapper implements SchemaContract, MetaHolder, SchemaExporter, \JsonSerial
 
     /**
      * @param mixed $data
-     * @param Context $options
-     * @param string $path
-     * @param mixed|null $result
+     * @param Context $context
      * @return array|mixed|null|object|\stdClass
      * @throws InvalidValue
      * @throws \Exception
      * @throws \Swaggest\JsonDiff\Exception
      */
-    public function process($data, Context $options, $path = '#', $result = null)
+    public function process($data, Context $context)
     {
-        return $this->schema->process($data, $options, $path, $result);
+        return $this->schema->process($data, $context);
     }
 
     /**
@@ -60,14 +58,14 @@ class Wrapper implements SchemaContract, MetaHolder, SchemaExporter, \JsonSerial
 
     /**
      * @param mixed $data
-     * @param Context|null $options
+     * @param Context|null $context
      * @return array|mixed|null|object|\stdClass
      * @throws InvalidValue
      * @throws \Exception
      */
-    public function out($data, Context $options = null)
+    public function out($data, Context $context = null)
     {
-        return $this->schema->out($data, $options);
+        return $this->schema->out($data, $context);
     }
 
     /**

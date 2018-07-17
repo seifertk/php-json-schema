@@ -50,14 +50,14 @@ trait ClassStructureTrait
 
     /**
      * @param mixed $data
-     * @param Context $options
+     * @param Context $context
      * @return static|mixed
      * @throws \Swaggest\JsonSchema\Exception
      * @throws \Swaggest\JsonSchema\InvalidValue
      */
-    public static function import($data, Context $options = null)
+    public static function import($data, Context $context = null)
     {
-        return static::schema()->in($data, $options);
+        return static::schema()->in($data, $context);
     }
 
     /**
