@@ -39,6 +39,9 @@ class Context extends MagicMap
     /** @var bool pack/unpack application/json in string content */
     public $unpackContentMediaType = true;
 
+    /** @var bool export/not export properties without a value (NULL) */
+    public $exportNullValues = false;
+
     /** @var \SplObjectStorage optional schemas cache */
     public $schemasCache;
 
