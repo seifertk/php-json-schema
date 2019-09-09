@@ -1103,7 +1103,10 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract
             }
             $options->circularReferences->attach($data, $path);
 
-            $data = $data->jsonSerialize($options->exportNullValues);
+            if ($data instanceof ClassStructure) {
+                $data->__exportNullValues = $options->exportNullValues;
+            }
+            $data = $data->jsonSerialize();
         }
 
         $path .= $this->getFromRefPath();

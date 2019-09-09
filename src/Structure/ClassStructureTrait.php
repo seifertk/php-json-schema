@@ -92,11 +92,11 @@ trait ClassStructureTrait
 
     protected $__validateOnSet = true; // todo skip validation during import
 
+    protected $__exportNullValues = false;
     /**
-     * @param bool $exportNullValues
      * @return \stdClass
      */
-    public function jsonSerialize($exportNullValues = false)
+    public function jsonSerialize()
     {
         $result = new \stdClass();
         $schema = static::schema();
@@ -110,7 +110,7 @@ trait ClassStructureTrait
                     (
                         null !== $value
                         ||
-                        ($value === null && property_exists($classReference, $propertyName)) && $exportNullValues)
+                        ($value === null && property_exists($classReference, $propertyName)) && $this->__exportNullValues)
                     || array_key_exists($propertyName, $this->__arrayOfData)
                 ) {
                     $result->$dataName = $value;
