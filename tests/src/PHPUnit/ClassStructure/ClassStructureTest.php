@@ -105,12 +105,6 @@ class ClassStructureTest extends \PHPUnit_Framework_TestCase
             'subTwo' => 'two'
         ));
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $exported = SampleProperties::export($properties);
-        $this->assertSame('{}', json_encode($exported, JSON_PRETTY_PRINT), 'With flag to false');
-
-
-        $properties->setExtendedPropertySerialization();
         $exported = SampleProperties::export($properties);
         $json = <<<JSON
 {
@@ -129,11 +123,6 @@ JSON;
         $properties->setXValue('x-foo', 'bar');
         $properties->setXValue('x-baz', 'gnu');
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $exported = SampleProperties::export($properties);
-        $this->assertSame('{}', json_encode($exported, JSON_PRETTY_PRINT), 'With flag to false');
-
-        $properties->setExtendedPropertySerialization();
         $exported = SampleProperties::export($properties);
         $json = <<<JSON
 {
