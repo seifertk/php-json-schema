@@ -8,7 +8,7 @@ use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\RemoteRef\Preloaded;
 
-abstract class SchemaTestSuite extends \PHPUnit_Framework_TestCase
+abstract class SchemaTestSuite extends \PHPUnit\Framework\TestCase
 {
     const SCHEMA_VERSION = Schema::VERSION_DRAFT_04;
 

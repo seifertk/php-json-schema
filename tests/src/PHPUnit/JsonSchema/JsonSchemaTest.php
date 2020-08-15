@@ -3,7 +3,7 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\JsonSchema;
 
 use Swaggest\JsonSchema\Schema;
 
-class JsonSchemaTest extends \PHPUnit_Framework_TestCase
+class JsonSchemaTest extends \PHPUnit\Framework\TestCase
 {
     public function testJsonSchema()
     {

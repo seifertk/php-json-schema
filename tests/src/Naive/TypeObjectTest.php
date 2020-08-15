@@ -5,7 +5,7 @@ namespace Swaggest\JsonSchema\Tests\Naive;
 use Swaggest\JsonSchema\Exception\TypeException;
 use Swaggest\JsonSchema\Schema;
 
-class TypeObjectTest extends \PHPUnit_Framework_TestCase
+class TypeObjectTest extends \PHPUnit\Framework\TestCase
 {
     public function testValid()
     {
@@ -28,7 +28,9 @@ class TypeObjectTest extends \PHPUnit_Framework_TestCase
     {
 //        $this->markTestSkipped('additionalProperties or generic object required, not implemented');
 
-        $this->setExpectedException(get_class(new TypeException()), 'Object expected, 123 received');
+        $this->expectException(get_class(new TypeException()));
+        $this->expectExceptionMessage('Object expected, 123 received');
+//        $this->setExpectedException(get_class(new TypeException()), 'Object expected, 123 received');
         $schema = Schema::import((object)array('type' => 'object'));
         $this->assertSame(123, $schema->in(123));
     }

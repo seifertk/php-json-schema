@@ -7,7 +7,7 @@ use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\Structure\ObjectItem;
 use Swaggest\JsonSchema\Tests\Helper\RefClass;
 
-class ExportTest extends \PHPUnit_Framework_TestCase
+class ExportTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @throws \Swaggest\JsonSchema\Exception

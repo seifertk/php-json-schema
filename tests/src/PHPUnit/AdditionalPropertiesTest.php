@@ -5,7 +5,7 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit;
 
 use Swaggest\JsonSchema\Schema;
 
-class AdditionalPropertiesTest extends \PHPUnit_Framework_TestCase
+class AdditionalPropertiesTest extends \PHPUnit\Framework\TestCase
 {
 
     public function testBasic()

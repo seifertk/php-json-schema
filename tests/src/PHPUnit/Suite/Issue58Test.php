@@ -7,7 +7,7 @@ use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\Tests\Helper\SimpleClass;
 
-class Issue58Test extends \PHPUnit_Framework_TestCase
+class Issue58Test extends \PHPUnit\Framework\TestCase
 {
     private function getData()
     {
@@ -34,13 +34,14 @@ class Issue58Test extends \PHPUnit_Framework_TestCase
     public function testSimpleClass()
     {
         $this->getSchema()->out($this->getData());
+        $this->assertTrue(true);
     }
 
     public function testSimpleClassFailed()
     {
         $data = $this->getData();
         $data->email = 'bla-bla';
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $this->getSchema()->out($data);
     }
 

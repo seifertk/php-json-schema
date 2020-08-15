@@ -9,7 +9,7 @@ use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\Tests\Helper\DbId;
 use Swaggest\JsonSchema\Tests\Helper\DeepRefRoot;
 
-class ExportSchemaTest extends \PHPUnit_Framework_TestCase
+class ExportSchemaTest extends \PHPUnit\Framework\TestCase
 {
     public function testSchemaExport()
     {

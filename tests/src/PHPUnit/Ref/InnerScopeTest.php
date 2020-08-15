@@ -7,7 +7,7 @@ use Swaggest\JsonSchema\Exception;
 use Swaggest\JsonSchema\RefResolver;
 use Swaggest\JsonSchema\RemoteRef\Preloaded;
 
-class InnerScopeTest extends \PHPUnit_Framework_TestCase
+class InnerScopeTest extends \PHPUnit\Framework\TestCase
 {
     public function testInnerDef()
     {

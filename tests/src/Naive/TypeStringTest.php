@@ -5,7 +5,7 @@ namespace Swaggest\JsonSchema\Tests\Naive;
 use Swaggest\JsonSchema\Exception\TypeException;
 use Swaggest\JsonSchema\Schema;
 
-class TypeStringTest extends \PHPUnit_Framework_TestCase
+class TypeStringTest extends \PHPUnit\Framework\TestCase
 {
     public function testValid()
     {
@@ -24,7 +24,8 @@ class TypeStringTest extends \PHPUnit_Framework_TestCase
                 'type' => 'integer',
             )
         );
-        $this->setExpectedException(get_class(new TypeException()), 'Integer expected, "123" received');
+        $this->expectException(get_class(new TypeException()));
+        $this->expectExceptionMessage('Integer expected, "123" received');
         $this->assertSame(123, $schema->in('123'));
     }
 }

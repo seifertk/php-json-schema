@@ -6,7 +6,7 @@ use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 
-class TolerateStringsTest extends \PHPUnit_Framework_TestCase
+class TolerateStringsTest extends \PHPUnit\Framework\TestCase
 {
     public function testWithTolerateStrings()
     {
@@ -78,7 +78,8 @@ class TolerateStringsTest extends \PHPUnit_Framework_TestCase
 
         $schema = Schema::import($json_schema);
 
-        $this->setExpectedException(get_class(new InvalidValue()), 'Number expected, "bad" received at #->items:2');
+        $this->expectException(get_class(new InvalidValue()));
+        $this->expectExceptionMessage('Number expected, "bad" received at #->items:2');
         $schema->in($data, $options);
     }
 
@@ -109,7 +110,8 @@ class TolerateStringsTest extends \PHPUnit_Framework_TestCase
 
         $schema = Schema::import($json_schema);
 
-        $this->setExpectedException(get_class(new InvalidValue()), 'Integer expected, "bad" received at #->items:1');
+        $this->expectException(get_class(new InvalidValue()));
+        $this->expectExceptionMessage('Integer expected, "bad" received at #->items:1');
         $schema->in($data, $options);
     }
 
@@ -140,7 +142,8 @@ class TolerateStringsTest extends \PHPUnit_Framework_TestCase
 
         $schema = Schema::import($json_schema);
 
-        $this->setExpectedException(get_class(new InvalidValue()), 'Boolean expected, "bad" received at #->items:3');
+        $this->expectException(get_class(new InvalidValue()));
+        $this->expectExceptionMessage('Boolean expected, "bad" received at #->items:3');
         $schema->in($data, $options);
     }
 
@@ -176,7 +179,8 @@ class TolerateStringsTest extends \PHPUnit_Framework_TestCase
 
         $schema = Schema::import($json_schema);
 
-        $this->setExpectedException(get_class(new InvalidValue()), 'Enum failed, enum: [1,2,3], data: 5 at #->items:4');
+        $this->expectException(get_class(new InvalidValue()));
+        $this->expectExceptionMessage('Enum failed, enum: [1,2,3], data: 5 at #->items:4');
         $schema->in($data, $options);
     }
 }

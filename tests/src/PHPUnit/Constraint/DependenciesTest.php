@@ -6,7 +6,7 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\Constraint;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 
-class DependenciesTest extends \PHPUnit_Framework_TestCase
+class DependenciesTest extends \PHPUnit\Framework\TestCase
 {
     public function testSubschemaDeps()
     {
@@ -51,7 +51,7 @@ JSON;
 
 
         $schema = Schema::import(json_decode($schemaJson));
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in(json_decode($dataJson));
     }
 

@@ -13,7 +13,7 @@ use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\Tests\PHPUnit\Spec\Draft4Test;
 use Swaggest\JsonSchema\Tests\PHPUnit\Suite\SuiteTest;
 
-class RefTest extends \PHPUnit_Framework_TestCase
+class RefTest extends \PHPUnit\Framework\TestCase
 {
 
     public function testResolve()
@@ -89,6 +89,7 @@ class RefTest extends \PHPUnit_Framework_TestCase
         $schema = Schema::import(json_decode($schemaJson), $options);
 
         $schema->in(json_decode($dataJson));
+        $this->assertTrue(true);
     }
 
 
@@ -105,7 +106,7 @@ class RefTest extends \PHPUnit_Framework_TestCase
         $options->setRemoteRefProvider(new Preloaded());
         $schema = Schema::import(json_decode($schemaJson), $options);
 
-        $this->setExpectedException(get_class(new LogicException()));
+        $this->expectException(get_class(new LogicException()));
         $result = $schema->in(json_decode($dataJson));
     }
 
@@ -125,7 +126,7 @@ class RefTest extends \PHPUnit_Framework_TestCase
         $options->setRemoteRefProvider(new Preloaded());
         $schema = Schema::import(json_decode($schemaJson), $options);
 
-        $this->setExpectedException(get_class(new TypeException()));
+        $this->expectException(get_class(new TypeException()));
         $schema->in(json_decode($dataJson));
     }
 
@@ -147,7 +148,7 @@ JSON;
         $schema = Schema::import(json_decode($schemaJson), $options);
 
         $schema->in(1);
-        $this->setExpectedException(get_class(new TypeException()));
+        $this->expectException(get_class(new TypeException()));
         $schema->in('a');
     }
 
@@ -181,7 +182,7 @@ JSON;
 
         $schema = Schema::import(json_decode($schemaJson));
         $schema->in(json_decode($dataJson));
-        $this->setExpectedException(get_class(new ObjectException()));
+        $this->expectException(get_class(new ObjectException()));
         $schema->in(json_decode($dataInvalidJson));
     }
 
@@ -268,7 +269,7 @@ JSON;
 
         $schema = Schema::import(json_decode($schemaJson));
 
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in(json_decode($dataJson));
     }
 
@@ -312,7 +313,7 @@ JSON
         $schema = Schema::import($testData->schema, $options);
 
         $schema->in($testData->tests[0]->data);
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in($testData->tests[1]->data);
     }
 
@@ -360,7 +361,7 @@ JSON
         $schema = Schema::import($testData->schema, $options);
 
         $schema->in($testData->tests[0]->data);
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in($testData->tests[1]->data);
 
 
@@ -395,7 +396,7 @@ JSON
                 SuiteTest::getProvider())
         );
         $schema->in($testData->tests[0]->data);
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in($testData->tests[1]->data);
 
     }
@@ -428,7 +429,7 @@ JSON
                 Draft4Test::getProvider())
         );
         $schema->in($testData->tests[0]->data);
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in($testData->tests[1]->data);
 
     }
@@ -465,7 +466,7 @@ JSON
                 Draft4Test::getProvider())
         );
         $schema->in($testData->tests[0]->data);
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in($testData->tests[1]->data);
 
     }
@@ -502,7 +503,7 @@ JSON
                 Draft4Test::getProvider())
         );
         $schema->in($testData->tests[0]->data);
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in($testData->tests[1]->data);
 
     }
@@ -519,7 +520,7 @@ JSON
 }
 JSON
 ));
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in("foo");
     }
 }

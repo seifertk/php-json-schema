@@ -4,11 +4,12 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\Ref;
 
 
 use Swaggest\JsonSchema\Context;
+use Swaggest\JsonSchema\Exception\ObjectException;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\RemoteRef\Preloaded;
 use Swaggest\JsonSchema\Schema;
 
-class FileResolverTest extends \PHPUnit_Framework_TestCase
+class FileResolverTest extends \PHPUnit\Framework\TestCase
 {
     public function testFileResolver()
     {
@@ -80,7 +81,7 @@ JSON
         $schema = Schema::import($schemaData);
         $schema->in(123);
 
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in('abc');
     }
 
@@ -96,7 +97,7 @@ JSON
         $schema = Schema::import($schemaData);
         $schema->in(123);
 
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in('abc');
     }
 
@@ -112,7 +113,7 @@ JSON
         $schema = Schema::import($schemaData);
         $schema->in(123);
 
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in('abc');
     }
 
@@ -129,7 +130,7 @@ JSON
         $schema = Schema::import($schemaData);
         $schema->in(123);
 
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in('abc');
     }
 
@@ -145,7 +146,7 @@ JSON
         $schema = Schema::import($schemaData);
         $schema->in(123);
 
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in('abc');
     }
 

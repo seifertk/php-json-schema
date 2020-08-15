@@ -9,7 +9,7 @@ use Swaggest\JsonSchema\Tests\Helper\SampleProperties;
 use Swaggest\JsonSchema\Tests\Helper\SampleStructure;
 use Swaggest\JsonSchema\Tests\Helper\StructureWithItems;
 
-class ClassStructureTest extends \PHPUnit_Framework_TestCase
+class ClassStructureTest extends \PHPUnit\Framework\TestCase
 {
     public function testSample()
     {
@@ -78,7 +78,8 @@ class ClassStructureTest extends \PHPUnit_Framework_TestCase
     public function testSampleInvalid()
     {
         $schema = SampleStructure::schema();
-        $this->setExpectedException(get_class(new TypeException()), 'String expected, 11 received at #->$ref[#/definitions/Swaggest\JsonSchema\Tests\Helper\SampleStructure]->properties:recursion->$ref[#/definitions/Swaggest\JsonSchema\Tests\Helper\SampleStructure]->properties:propOne');
+        $this->expectException(get_class(new TypeException()));
+        $this->expectExceptionMessage('String expected, 11 received at #->$ref[#/definitions/Swaggest\JsonSchema\Tests\Helper\SampleStructure]->properties:recursion->$ref[#/definitions/Swaggest\JsonSchema\Tests\Helper\SampleStructure]->properties:propOne');
         $schema->in((object)array(
             'propOne' => '1',
             'propTwo' => 2,

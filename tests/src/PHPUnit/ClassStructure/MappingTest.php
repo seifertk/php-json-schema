@@ -6,7 +6,7 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\ClassStructure;
 use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\Tests\Helper\Order;
 
-class MappingTest extends \PHPUnit_Framework_TestCase
+class MappingTest extends \PHPUnit\Framework\TestCase
 {
     public function testNameMapper()
     {

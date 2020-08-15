@@ -6,13 +6,14 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\Example;
 use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\Exception\NumericException;
 use Swaggest\JsonSchema\Exception\ObjectException;
+use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\Structure\Composition;
 use Swaggest\JsonSchema\Tests\Helper\Order;
 use Swaggest\JsonSchema\Tests\Helper\User;
 use Swaggest\JsonSchema\Tests\Helper\UserInfo;
 
-class ExampleTest extends \PHPUnit_Framework_TestCase
+class ExampleTest extends \PHPUnit\Framework\TestCase
 {
 
     public function setUp()
@@ -22,9 +23,8 @@ class ExampleTest extends \PHPUnit_Framework_TestCase
 
     public function testJsonSchema()
     {
-        $this->setExpectedException(get_class(new ObjectException()),
-            'Required property missing: id, data: {"price":1} at #->properties:orders->items[1]'
-        );
+        $this->expectException(get_class(new ObjectException()));
+        $this->expectExceptionMessage('Required property missing: id, data: {"price":1} at #->properties:orders->items[1]');
 
         $schemaJson = <<<'JSON'
 {
@@ -86,7 +86,9 @@ JSON
 
     public function testEarlyValidation()
     {
-        $this->setExpectedException(get_class(new NumericException()), 'Value more than 0 expected, -1 received', NumericException::MINIMUM);
+        $this->expectException(get_class(new NumericException()));
+        $this->expectExceptionMessage('Value more than 0 expected, -1 received');
+        $this->expectExceptionCode(NumericException::MINIMUM);
         $example = new User();
         $example->quantity = -1; // Exception: Value more than 0 expected, -1 received
     }
@@ -105,7 +107,8 @@ JSON
 
     public function testMissingRequiredProperty()
     {
-        $this->setExpectedException(get_class(new ObjectException()), 'Required property missing: id');
+        $this->expectException(get_class(new ObjectException()));
+        $this->expectExceptionMessage('Required property missing: id');
 
         $example = new User();
         $example->quantity = 10;
@@ -122,7 +125,8 @@ JSON
         $order->dateTime = '2015-10-28T07:28:00Z';
         $example->orders[] = $order;
 
-        $this->setExpectedException(get_class(new ObjectException()), 'Required property missing: id, data: {"date_time":"2015-10-28T07:28:00Z"} at #->$ref[#/definitions/user]->properties:orders->items[0]:0->$ref[#/definitions/order]');
+        $this->expectException(get_class(new ObjectException()));
+        $this->expectExceptionMessage('Required property missing: id, data: {"date_time":"2015-10-28T07:28:00Z"} at #->$ref[#/definitions/user]->properties:orders->items[0]:0->$ref[#/definitions/order]');
         /** @noinspection PhpUnhandledExceptionInspection */
         User::export($example); // Exception: Required property missing: id, data: {"dateTime":"2015-10-28T07:28:00Z"} at #->$ref[#/definitions/user]->properties:orders->items[0]:0->$ref[#/definitions/order]
     }

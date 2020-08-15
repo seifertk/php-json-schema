@@ -4,11 +4,12 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\Suite;
 
 
 use Swaggest\JsonSchema\Context;
+use Swaggest\JsonSchema\Exception\TypeException;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\RemoteRef\Preloaded;
 use Swaggest\JsonSchema\Schema;
 
-class Issue33Test extends \PHPUnit_Framework_TestCase
+class Issue33Test extends \PHPUnit\Framework\TestCase
 {
     public function testRef() {
         $schemaJson = <<<'JSON'
@@ -46,7 +47,7 @@ JSON;
         $options->setRemoteRefProvider($provider);
         $schema = Schema::import(json_decode($schemaJson), $options);
         $schema->in(json_decode('{"appId":123}'));
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in(json_decode('{"appId":"some-string"}'));
     }
 

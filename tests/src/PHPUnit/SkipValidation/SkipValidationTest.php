@@ -5,7 +5,7 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\SkipValidation;
 use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\Schema;
 
-class SkipValidationTest extends \PHPUnit_Framework_TestCase
+class SkipValidationTest extends \PHPUnit\Framework\TestCase
 {
     public function testSkipValidation()
     {
@@ -14,6 +14,7 @@ class SkipValidationTest extends \PHPUnit_Framework_TestCase
         $options = new Context();
         $options->skipValidation = true;
         $schema->in(4, $options);
+        $this->assertTrue(true);
     }
 
 

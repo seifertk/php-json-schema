@@ -5,7 +5,7 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\Misc;
 
 use Swaggest\JsonSchema\Helper;
 
-class ResolveURITest extends \PHPUnit_Framework_TestCase
+class ResolveURITest extends \PHPUnit\Framework\TestCase
 {
     public function testResolve()
     {

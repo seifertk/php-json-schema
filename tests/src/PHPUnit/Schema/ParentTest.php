@@ -8,7 +8,7 @@ use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\SchemaContract;
 
-class ParentTest extends \PHPUnit_Framework_TestCase
+class ParentTest extends \PHPUnit\Framework\TestCase
 {
     protected function deepSchema()
     {
@@ -54,8 +54,8 @@ class ParentTest extends \PHPUnit_Framework_TestCase
     public function testInvalidImport()
     {
         $schema = $this->deepSchema();
-        $this->setExpectedException(get_class(new TypeException()),
-            'Integer expected, "abc" received at #->properties:level1->properties:level2->properties:level3');
+        $this->expectException(get_class(new TypeException()));
+        $this->expectExceptionMessage('Integer expected, "abc" received at #->properties:level1->properties:level2->properties:level3');
         try {
             $object = $schema->in((object)array(
                 'level1'=> (object)array(

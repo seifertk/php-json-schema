@@ -4,11 +4,12 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\Suite;
 
 
 use Swaggest\JsonSchema\Context;
+use Swaggest\JsonSchema\Exception\TypeException;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\RemoteRef\Preloaded;
 use Swaggest\JsonSchema\Schema;
 
-class Issue35Test extends \PHPUnit_Framework_TestCase
+class Issue35Test extends \PHPUnit\Framework\TestCase
 {
     public function testOne()
     {
@@ -27,7 +28,7 @@ class Issue35Test extends \PHPUnit_Framework_TestCase
         
         $this->assertSame('{"id":"https://some-domain/Foo/Bar#","oneOf":[{"type":"integer"}]}', json_encode($schema, JSON_UNESCAPED_SLASHES));
 
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in("not integer");
     }
 
@@ -48,7 +49,7 @@ class Issue35Test extends \PHPUnit_Framework_TestCase
 
         $this->assertSame('{"id":"https://some-domain/Foo/Bar#","oneOf":[{"type":"integer"}]}', json_encode($schema, JSON_UNESCAPED_SLASHES));
 
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in("not integer");
     }
 
@@ -69,7 +70,7 @@ class Issue35Test extends \PHPUnit_Framework_TestCase
 
         $this->assertSame('{"id":"https://some-domain/Foo/Bar#","oneOf":[{"type":"integer"}]}', json_encode($schema, JSON_UNESCAPED_SLASHES));
 
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in("not integer");
     }
 
@@ -90,7 +91,7 @@ class Issue35Test extends \PHPUnit_Framework_TestCase
 
         $this->assertSame('{"id":"https://some-domain/Foo/Bar#","oneOf":[{"type":"integer"}]}', json_encode($schema, JSON_UNESCAPED_SLASHES));
 
-        $this->setExpectedException(get_class(new InvalidValue()));
+        $this->expectException(get_class(new InvalidValue()));
         $schema->in("not integer");
     }
 

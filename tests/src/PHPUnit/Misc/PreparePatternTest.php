@@ -4,7 +4,7 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\Misc;
 
 use Swaggest\JsonSchema\Helper;
 
-class PreparePatternTest extends \PHPUnit_Framework_TestCase
+class PreparePatternTest extends \PHPUnit\Framework\TestCase
 {
     public function testPreparePatternForEmail()
     {

@@ -4,7 +4,7 @@ namespace Swaggest\JsonSchema\Tests\Naive;
 
 use Swaggest\JsonSchema\Schema;
 
-class PropertiesTest extends \PHPUnit_Framework_TestCase
+class PropertiesTest extends \PHPUnit\Framework\TestCase
 {
     public function testValid()
     {

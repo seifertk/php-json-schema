@@ -5,7 +5,7 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\Path;
 
 use Swaggest\JsonSchema\Path\PointerUtil;
 
-class PointerUtilTest extends \PHPUnit_Framework_TestCase
+class PointerUtilTest extends \PHPUnit\Framework\TestCase
 {
     public function testGetDataPointer()
     {

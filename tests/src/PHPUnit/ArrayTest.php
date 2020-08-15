@@ -3,9 +3,10 @@
 namespace Swaggest\JsonSchema\Tests\PHPUnit;
 
 use Swaggest\JsonSchema\Exception;
+use Swaggest\JsonSchema\Exception\TypeException;
 use Swaggest\JsonSchema\Schema;
 
-class ArrayTest extends \PHPUnit_Framework_TestCase
+class ArrayTest extends \PHPUnit\Framework\TestCase
 {
     public function testItems()
     {
@@ -27,7 +28,7 @@ class ArrayTest extends \PHPUnit_Framework_TestCase
 
         $schema->in(array("one", 2));
 
-        $this->setExpectedException(get_class(new Exception()));
+        $this->expectException(get_class(new Exception()));
         $schema->in(array(1, "two"));
     }
 

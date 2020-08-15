@@ -5,7 +5,7 @@ namespace PHPUnit\ClassStructure;
 
 use Swaggest\JsonSchema\Structure\ObjectItem;
 
-class ObjectItemTest extends \PHPUnit_Framework_TestCase
+class ObjectItemTest extends \PHPUnit\Framework\TestCase
 {
     public function testIndirectIsset()
     {

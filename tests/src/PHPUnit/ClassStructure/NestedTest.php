@@ -8,7 +8,7 @@ use Swaggest\JsonSchema\Tests\Helper\LevelThreeClass;
 use Swaggest\JsonSchema\Tests\Helper\NestedStructure;
 use Swaggest\JsonSchema\Tests\Helper\SampleStructure;
 
-class NestedTest extends \PHPUnit_Framework_TestCase
+class NestedTest extends \PHPUnit\Framework\TestCase
 {
     public function testClassStructure()
     {

@@ -4,7 +4,7 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\Suite;
 
 use Swaggest\JsonSchema\Tests\Helper\User63;
 
-class Issue63Test extends \PHPUnit_Framework_TestCase
+class Issue63Test extends \PHPUnit\Framework\TestCase
 {
     function testIssue()
     {

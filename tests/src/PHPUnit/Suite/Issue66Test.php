@@ -6,7 +6,7 @@ use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\RemoteRef\Preloaded;
 use Swaggest\JsonSchema\Schema;
 
-class Issue66Test extends \PHPUnit_Framework_TestCase
+class Issue66Test extends \PHPUnit\Framework\TestCase
 {
     public function testIssue()
     {

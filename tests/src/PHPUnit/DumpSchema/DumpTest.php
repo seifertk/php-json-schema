@@ -4,7 +4,7 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\DumpSchema;
 
 use Swaggest\JsonSchema\Schema;
 
-class DumpTest extends \PHPUnit_Framework_TestCase
+class DumpTest extends \PHPUnit\Framework\TestCase
 {
     public function testDump()
     {

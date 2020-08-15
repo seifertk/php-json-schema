@@ -5,7 +5,7 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\Constraint;
 use Swaggest\JsonSchema\Constraint\Type;
 use Swaggest\JsonSchema\Schema;
 
-class DefaultTest extends \PHPUnit_Framework_TestCase
+class DefaultTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @throws \Exception

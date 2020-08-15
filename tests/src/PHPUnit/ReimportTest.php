@@ -8,7 +8,7 @@ use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\RemoteRef\Preloaded;
 use Swaggest\JsonSchema\Schema;
 
-class ReImportTest extends \PHPUnit_Framework_TestCase
+class ReImportTest extends \PHPUnit\Framework\TestCase
 {
 
     public function testJsonSchema()
@@ -17,6 +17,7 @@ class ReImportTest extends \PHPUnit_Framework_TestCase
         $data = json_decode($data);
 
         $schema = Schema::import($data, new Context(new Preloaded()));
+        $this->assertTrue(true);
     }
 
 
@@ -33,6 +34,7 @@ class ReImportTest extends \PHPUnit_Framework_TestCase
         //print_r($jsonSchema);
 // #->properties:definitions->additionalProperties->properties:items->anyOf:0->$ref:#->properties:dependencies->additionalProperties
 
+        $this->assertTrue(true);
     }
 
 }
