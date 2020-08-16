@@ -6,7 +6,6 @@ namespace Swaggest\JsonSchema\Tests\PHPUnit\Example;
 use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\Exception\NumericException;
 use Swaggest\JsonSchema\Exception\ObjectException;
-use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\Structure\Composition;
 use Swaggest\JsonSchema\Tests\Helper\Order;
@@ -16,7 +15,7 @@ use Swaggest\JsonSchema\Tests\Helper\UserInfo;
 class ExampleTest extends \PHPUnit\Framework\TestCase
 {
 
-    public function setUp()
+    public function setUp() : void
     {
         ini_set('serialize_precision', -1);
     }

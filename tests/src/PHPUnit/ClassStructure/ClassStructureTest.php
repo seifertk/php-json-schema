@@ -2,6 +2,7 @@
 
 namespace Swaggest\JsonSchema\Tests\PHPUnit\ClassStructure;
 
+use Swaggest\JsonSchema\Exception\StringException;
 use Swaggest\JsonSchema\Exception\TypeException;
 use Swaggest\JsonSchema\Tests\Helper\ClassWithAllOf;
 use Swaggest\JsonSchema\Tests\Helper\LevelThreeClass;
@@ -133,12 +134,10 @@ JSON;
         $this->assertSame($json, json_encode($exported, JSON_PRETTY_PRINT), 'With flag to true');
     }
 
-    /**
-     * @expectedException        Swaggest\JsonSchema\Exception\StringException
-     * @expectedExceptionMessage Pattern mismatch
-     */
     public function testPatternPropertiesMismatch()
     {
+        $this->expectException(get_class(new StringException()));
+        $this->expectExceptionMessage('Pattern mismatch');
         $properties = new SampleProperties();
         $properties->setXValue('xfoo', 'bar');
     }

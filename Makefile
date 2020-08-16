@@ -1,5 +1,6 @@
 PHPSTAN_VERSION ?= 0.11.15
 PHPBENCH_VERSION ?= 0.16.10
+PHP ?= php:7.4-cli
 
 deps:
 	@git submodule init && git submodule update
@@ -15,8 +16,7 @@ test:
 	@php -derror_reporting="E_ALL & ~E_DEPRECATED" vendor/bin/phpunit --configuration phpunit.xml
 
 docker-test:
-	@docker run -v $$PWD:/app -w /app --rm php:7.4-cli -derror_reporting="E_ALL & ~E_DEPRECATED" vendor/bin/phpunit --configuration phpunit.xml
-	@#docker run -v $$PWD:/app -w /app --rm php:8.0-rc-cli -derror_reporting="E_ALL & ~E_DEPRECATED" vendor/bin/phpunit --configuration phpunit.xml
+	@docker run -v $$PWD:/app -w /app --rm ${PHP} -derror_reporting="E_ALL & ~E_DEPRECATED" vendor/bin/phpunit --configuration phpunit.xml
 
 test-coverage:
 	@php -derror_reporting="E_ALL & ~E_DEPRECATED" -dzend_extension=xdebug.so vendor/bin/phpunit --configuration phpunit.xml --coverage-text --coverage-clover=coverage.xml
@@ -26,6 +26,9 @@ phpbench:
 
 bench: phpbench
 	@php $$HOME/.cache/composer/phpbench-${PHPBENCH_VERSION}.phar run benchmarks --tag=candidate --progress=none --bootstrap=vendor/autoload.php --revs=50 --iterations=5 --retry-threshold=3 --dump-file=phpbench-candidate.xml
+
+docker-micro-bench:
+	@docker run -v $$PWD:/app -w /app --rm ${PHP} php -dopcache.enable_cli=1 ./tools/bench-micro.php
 
 bench-master: phpbench
 	@git checkout --detach && git fetch origin '+refs/heads/master:refs/heads/master' && git checkout master -- ./src
