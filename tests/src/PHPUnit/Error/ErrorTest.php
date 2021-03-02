@@ -241,4 +241,151 @@ JSON
         }
     }
 
+    public function testIssue() {
+        $dataJson = <<<'JSON'
+{
+    "companyId": 531254,
+    "name": "Discount 1",
+    "code23": "FREE32%",
+    "discountMethod": "FIXED",
+    "discountAmount": 5,
+    "discountApply": [
+        {
+        "appliesTo": "TICKET",
+        "appliesToId": [
+            908124,
+            908125,
+            908126
+        ]
+        },
+        {
+        "appliesTo": "EVENT",
+        "appliesToId": [
+            908124,
+            908125,
+            908126
+        ]
+        }
+    ],
+    "uses": "unlimited",
+    "validFrom": "2021-01-01T00:20:39+00:00",
+    "validTo": "2021-11-13T20:20:39+00:00"
+}
+JSON;
+
+        $schemaJson = <<<'JSON'
+{
+  "$id": "__SCHEMA_URL__",
+  "description": "Create a new promotion.",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "companyId": {
+      "title": "Company ID",
+      "type": "integer",
+      "minimum": 1
+    },
+    "name": {
+      "title": "Promotion title",
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128
+    },
+    "code": {
+      "title": "Promotion code",
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 64
+    },
+    "discountMethod": {
+      "title": "Promotion method",
+      "type": "string",
+      "enum": [
+        "FIXED",
+        "PERCENT"
+      ]
+    },
+    "discountAmount": {
+      "title": "Promotion amount",
+      "type": "number",
+      "minimum": 0
+    },
+    "discountApply": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "appliesTo": {
+            "title": "Promotion apply to one of the type",
+            "type": "string",
+            "enum": [
+              "PRICE_TYPE",
+              "TICKET",
+              "TICKET_GROUP",
+              "EVENT",
+              "COMPANY"
+            ]
+          },
+          "appliesToId": {
+            "type": "array",
+            "items": {
+              "title": "ID one of the type e.g. price type, ticket, group etc",
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "required": [
+          "appliesTo",
+          "appliesToId"
+        ]
+      }
+    },
+    "uses": {
+      "title": "Promotion usage limit",
+      "oneOf": [
+        {
+          "type": "number",
+          "minimum": 0.01
+        },
+        {
+          "type": "string",
+          "enum": [
+            "unlimited"
+          ]
+        }
+      ]
+    },
+    "validFrom": {
+      "title": "Promotion valid from",
+      "type": "string",
+      "format": "date-time"
+    },
+    "validTo": {
+      "title": "Promotion valid to",
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "companyId",
+    "name",
+    "code",
+    "discountMethod",
+    "discountAmount",
+    "uses"
+  ]
+}
+JSON;
+
+        $schema = Schema::import(json_decode($schemaJson));
+
+        try {
+            $schema->in(json_decode($dataJson));
+        } catch (InvalidValue $e) {
+            echo json_encode($e->inspect(), JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES);
+        }
+
+    }
+
 }

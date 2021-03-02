@@ -213,6 +213,11 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract, HasDefaul
             $valid = Type::isValid($this->type, $data, $options->version);
         }
         if (!$valid) {
+            if (is_object($data) && isset($data->{'$data'})) {
+                $data = new Data($data->{'$data'});
+                return;
+            }
+
             $this->fail(new TypeException(ucfirst(
                     implode(', ', is_array($this->type) ? $this->type : array($this->type))
                     . ' expected, ' . json_encode($data) . ' received')
@@ -367,16 +372,21 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract, HasDefaul
         }
 
         if ($this->maximum !== null) {
+            $maximum = $this->maximum;
+            if ($maximum instanceof Data) {
+                echo 'a';
+            }
+
             if ($this->exclusiveMaximum === true) {
-                if ($data >= $this->maximum) {
+                if ($data >= $maximum) {
                     $this->fail(new NumericException(
-                        'Value less or equal than ' . $this->maximum . ' expected, ' . $data . ' received',
+                        'Value less or equal than ' . $maximum . ' expected, ' . $data . ' received',
                         NumericException::MAXIMUM), $path);
                 }
             } else {
-                if ($data > $this->maximum) {
+                if ($data > $maximum) {
                     $this->fail(new NumericException(
-                        'Value less than ' . $this->maximum . ' expected, ' . $data . ' received',
+                        'Value less than ' . $maximum . ' expected, ' . $data . ' received',
                         NumericException::MAXIMUM), $path);
                 }
             }
@@ -1197,7 +1207,7 @@ class Schema extends JsonSchema implements MetaHolder, SchemaContract, HasDefaul
             $result = $this->processAllOf($data, $options, $path);
         }
 
-        if (is_object($data)) {
+        if (is_object($data) && !$data instanceof Data) {
             $result = $this->processObject($data, $options, $path, $result);
         }
 
