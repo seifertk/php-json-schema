@@ -84,7 +84,7 @@ class Format
 
     public static function dateTimeError($data)
     {
-        if (!preg_match('/^' . self::$dateRegexPart . 'T' . self::$timeRegexPart . '$/i', $data)) {
+        if (!preg_match('/^' . self::$dateRegexPart . '[T ]' . self::$timeRegexPart . '$/i', $data)) {
             return 'Invalid date-time format: ' . $data;
         }
 
