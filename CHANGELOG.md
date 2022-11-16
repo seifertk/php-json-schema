@@ -4,6 +4,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.41] - 2022-08-17
+
+### Fixed
+- Handling of unintialized typed properties, [#148](https://github.com/swaggest/php-json-schema/pull/148), [bruceoutdoors](https://github.com/bruceoutdoors).
+
+## [0.12.40] - 2022-08-17
+
+### Fixed
+- Handling of unintialized typed properties, [#147](https://github.com/swaggest/php-json-schema/pull/147), [bruceoutdoors](https://github.com/bruceoutdoors).
+
+## [0.12.39] - 2021-10-16
+
+### Added
+- Polyfill dependency for mbstring extension.
+
+## [0.12.38] - 2021-09-17
+
+### Fixed
+- PHP 8.1 Deprecation notices with missing returns.
+
+## [0.12.37] - 2021-08-29
+
+### Added
+- `InvalidValue` now exposes `data` and `constraint` values for structured context of validation failure.
+
+### Fixed 
+- Handling of `multipleOf: 0.01` float precision.
+
+## [0.12.36] - 2021-07-14
+
+### Added
+- Optional properties mapping in names reflector.
+
+## [0.12.35] - 2021-06-18
+
+### Fixed
+- Suppressed failure during reference resolution in complex schemas.
+
+## [0.12.34] - 2021-06-17
+
+### Fixed
+- Suppressed failure during reference resolution.
+
+## [0.12.33] - 2021-05-27
+
+### Fixed
+- Disable validation for default and const values.
+
+## [0.12.32] - 2021-05-12
+
+### Fixed
+- Suppressed failure during validation in referenced schema.
+
 ## [0.12.31] - 2020-09-21
 
 ### Fixed
@@ -68,6 +121,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Export `null` value instead of skipping it for properties having `null` type.
 
+[0.12.41]: https://github.com/swaggest/php-json-schema/compare/v0.12.40...v0.12.41
+[0.12.40]: https://github.com/swaggest/php-json-schema/compare/v0.12.39...v0.12.40
+[0.12.39]: https://github.com/swaggest/php-json-schema/compare/v0.12.38...v0.12.39
+[0.12.38]: https://github.com/swaggest/php-json-schema/compare/v0.12.37...v0.12.38
+[0.12.37]: https://github.com/swaggest/php-json-schema/compare/v0.12.36...v0.12.37
+[0.12.36]: https://github.com/swaggest/php-json-schema/compare/v0.12.35...v0.12.36
+[0.12.35]: https://github.com/swaggest/php-json-schema/compare/v0.12.34...v0.12.35
+[0.12.34]: https://github.com/swaggest/php-json-schema/compare/v0.12.33...v0.12.34
+[0.12.33]: https://github.com/swaggest/php-json-schema/compare/v0.12.32...v0.12.33
+[0.12.32]: https://github.com/swaggest/php-json-schema/compare/v0.12.31...v0.12.32
 [0.12.31]: https://github.com/swaggest/php-json-schema/compare/v0.12.30...v0.12.31
 [0.12.30]: https://github.com/swaggest/php-json-schema/compare/v0.12.29...v0.12.30
 [0.12.29]: https://github.com/swaggest/php-json-schema/compare/v0.12.28...v0.12.29
